@@ -6,16 +6,45 @@ clusterGroup:
     - open-cluster-management
     - vault
     - golang-external-secrets
+    - openshift-operators-redhat:
+        operatorGroup: true
+        targetNamespaces: ""
+    - openshift-distributed-tracing:
+        operatorGroup: true
+        targetNamespaces: ""
+    - dev-istio-system
+    - dev-travel-agency
+    - dev-travel-portal
+    - dev-travel-control
 
   subscriptions:
     acm:
       name: advanced-cluster-management
       namespace: open-cluster-management
-      channel: release-2.8
+      channel: release-2.9
       #csv: advanced-cluster-management.v2.6.1
 
+    elasticsearch:
+      name: elasticsearch-operator
+      namespace: openshift-operators-redhat
+    
+    jaeger:
+      name: jaeger-product
+      namespace: openshift-distributed-tracing
+    
+    kiali:
+      name: kiali-ossm
+      namespace: openshift-operators
+    
+    servicemesh:
+      name: servicemeshoperator
+      namespace: openshift-operators
+  
   projects:
     - hub
+    - servicemesh
+    - travelops-dev
+    - travelops-prod
 
   # Explicitly mention the cluster-state based overrides we plan to use for this pattern.
   # We can use self-referential variables because the chart calls the tpl function with these variables defined
@@ -62,7 +91,7 @@ clusterGroup:
       namespace: golang-external-secrets
       project: hub
       path: common/golang-external-secrets
-
+    
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
     # The default schedule is every 10 minutes: imperative.schedule
