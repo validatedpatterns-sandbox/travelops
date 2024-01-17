@@ -16,3 +16,9 @@ security:
   dataPlane:
     automtls: true
     mtls: true
+
+#ServiceMesh Membership 
+members:
+  - travel
+  - control
+  - portal
