@@ -17,7 +17,8 @@ security:
     automtls: true
     mtls: true
 
-#ServiceMesh Membership 
+# ServiceMesh Membership 
+# This generates a serviceMeshMembership in each component namespace
 members:
   - travel
   - control
