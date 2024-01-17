@@ -47,4 +47,4 @@ secretStore:
   kind: ClusterSecretStore
 
 mysqldbCredentials:
-  key: secret/data/hub/mysql-credentials
+  key: secret/data/global/mysql-credentials
