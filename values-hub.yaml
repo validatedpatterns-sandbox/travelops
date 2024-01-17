@@ -8,10 +8,10 @@ clusterGroup:
     - golang-external-secrets
     - openshift-operators-redhat:
         operatorGroup: true
-        targetNamespaces: ""
+        targetNamespaces:
     - openshift-distributed-tracing:
         operatorGroup: true
-        targetNamespaces: ""
+        targetNamespaces:
     - dev-istio-system
     - dev-travel-agency
     - dev-travel-portal
