@@ -91,6 +91,12 @@ clusterGroup:
       namespace: golang-external-secrets
       project: hub
       path: common/golang-external-secrets
+
+    mysql:
+      name: mysqldb
+      namespace: dev-travel-agency
+      project: travelops-dev
+      path: charts/mysqldb
     
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
