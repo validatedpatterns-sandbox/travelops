@@ -20,6 +20,6 @@ security:
 # ServiceMesh Membership 
 # This generates a serviceMeshMembership in each component namespace
 members:
-  - travel
+  - agency 
   - control
   - portal
