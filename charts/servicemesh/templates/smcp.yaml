@@ -1,0 +1,45 @@
+apiVersion: maistra.io/v2
+kind: ServiceMeshControlPlane
+metadata:
+  name: dev-basic
+  namespace: dev-istio-system
+spec:
+  addons:
+    grafana:
+      enabled: true
+    jaeger:
+      install:
+        storage:
+          type: Memory
+    kiali:
+      enabled: true
+    prometheus:
+      enabled: true
+  general:
+    logging:
+      logAsJSON: true
+  policy:
+    type: Istiod
+  profiles:
+  - default
+  proxy:
+    accessLogging:
+      file:
+        name: /dev/stdout
+    networking:
+      trafficControl:
+        inbound: {}
+        outbound:
+          policy: REGISTRY_ONLY
+  security:
+    controlPlane:
+      mtls: {{ default true .Values.security.controlPlane.mtls }}
+    dataPlane:
+      automtls: {{ default true .Values.security.dataPlane.automtls }}
+      mtls: {{ default true .Values.security.dataPlane.mtls }}
+  telemetry:
+    type: Istiod
+  tracing:
+    sampling: {{ .Values.tracing.sampling }}
+    type: Jaeger
+  version: {{ .Values.version }}
