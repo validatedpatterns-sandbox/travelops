@@ -17,7 +17,7 @@ spec:
       containers:
       {{- with .Values.image }}
         - name: mysqldb
-          image: {{ .registry }}/{{ .repository }}.{{ .tag }}
+          image: {{ .registry }}/{{ .repository }}:{{ .tag }}
           imagePullPolicy: {{ .pullPolicy }}
       {{- end }}
           ports:
