@@ -37,9 +37,13 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
+#by default the targetPort is undefined and its value matches the port. To override define the desired targetPort.
 service:
+  name: tcp
   type: ClusterIP
+  protocol: TCP
   port: 3306
+  targetPort: 
 
 # External Secrets Operator config
 secretStore:

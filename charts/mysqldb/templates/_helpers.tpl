@@ -34,6 +34,7 @@ Create chart name and version as used by the chart label.
 Common labels
 */}}
 {{- define "mysqldb.labels" -}}
+version: v1
 {{ include "mysqldb.selectorLabels" . }}
 {{- end }}
 
@@ -42,5 +43,4 @@ Selector labels
 */}}
 {{- define "mysqldb.selectorLabels" -}}
 app: {{ include "mysqldb.name" . }}
-version: v1
 {{- end }}
