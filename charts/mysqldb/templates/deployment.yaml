@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "mysqldb.fullname" . }}
+  labels:
+    {{- include "mysqldb.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+    {{- include "mysqldb.labels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+      {{- include "mysqldb.labels" . | nindent 8 }}
+    spec:
+      containers:
+      {{- with .Values.image }}
+        - name: mysqldb
+          image: {{ .registry }}/{{ .repository }}.{{ .tag }}
+          imagePullPolicy: {{ .pullPolicy }}
+      {{- end }}
+          ports:
+            - containerPort: {{ .Values.service.port }}
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: rootpasswd
+          args: ["--default-authentication-plugin","mysql_native_password"]
+          volumeMounts:
+            - name: var-lib-mysql
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: var-lib-mysql
+          emptyDir:
