@@ -34,5 +34,10 @@ spec:
               value: {{ $apps.name | quote }}
             - name: CURRENT_VERSION
               value: {{ $version }}
+          {{- if eq $apps.name "discounts" }}
+            - name: LISTEN_ADDRESS
+              value: 8000
+          {{ else }}
           {{- include "services.env" . | nindent 12 -}}
+          {{ end }}
 {{- end }}
