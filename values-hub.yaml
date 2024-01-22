@@ -94,7 +94,7 @@ clusterGroup:
 
     mysql:
       name: mysql
-      namespace: dev-travel-agency
+      namespace: dev-istio-system
       project: travelops-dev
       path: charts/mysqldb
 
