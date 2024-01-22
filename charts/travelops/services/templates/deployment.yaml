@@ -36,7 +36,7 @@ spec:
             - name: CURRENT_VERSION
               value: {{ $version }}
             - name: LISTEN_ADDRESS
-              value: 8000
+              value: :8000
           {{- if eq $apps.name "travels" }}
             - name: FLIGHTS_SERVICE
               value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
