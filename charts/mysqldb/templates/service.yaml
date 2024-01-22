@@ -4,7 +4,6 @@ metadata:
   labels:
     {{- include "mysqldb.selectorLabels" . | nindent 4 }}
   name: {{ include "mysqldb.fullname" . }}
-  namespace: dev-travel-agency
 spec:
   ports:
   {{- with .Values.service }}
