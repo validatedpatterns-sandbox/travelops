@@ -38,6 +38,7 @@ resources: {}
   #   memory: 128Mi
 
 appVersion: v1
+appEnv: dev
 
 apps:
   - name: cars

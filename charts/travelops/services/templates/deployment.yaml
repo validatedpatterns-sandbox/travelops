@@ -1,5 +1,6 @@
 {{- range $apps := .Values.apps }}
 {{ $version := $.Values.appVersion }}
+{{ $env := $.Values.appEnv }}
 {{- with $img := $.Values.image }}
 ---
 kind: Deployment
@@ -34,10 +35,19 @@ spec:
               value: {{ $apps.name | quote }}
             - name: CURRENT_VERSION
               value: {{ $version }}
-          {{- if eq $apps.name "discounts" }}
             - name: LISTEN_ADDRESS
               value: 8000
-          {{ else }}
-          {{- include "services.env" . | nindent 12 -}}
-          {{ end }}
+          {{- if eq $apps.name "travels" }}
+            - name: FLIGHTS_SERVICE
+              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+            - name: HOTELS_SERVICE
+              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+            - name: CARS_SERVICE
+              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+            - name: INSURANCES_SERVICE
+              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+          {{- else if ne $apps.name "discounts" }}
+          {{- include "services.mysqlEnv" . | nindent 12 -}}
+          {{- end }}
+
 {{- end }}
