@@ -1,0 +1,44 @@
+{{- range $apps := .Values.apps }}
+{{ $version := $.Values.appVersion }}
+{{ $env := $.Values.appEnv }}
+{{- with $img := $.Values.image }}
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: {{ $apps.name }}-{{ $version }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ $apps.name }}
+      version: {{ $version }}
+  replicas: {{ $.Values.replicaCount }}
+  template:
+    metadata:
+      annotations:
+      {{- include "portal.istioProxyConfig" . | nindent 8 }}
+      labels:
+        app: {{ $apps.name }}
+        version: {{ $version }}
+    spec:
+      containers:
+        - name: {{ $apps.name }}
+          image: {{ $img.registry }}/{{ $img.repository }}/demo_travels_{{ $apps.name }}:{{ $img.tag }}
+          imagePullPolicy: {{ $img.pullPolicy }}
+{{- end }}
+          ports:
+            - containerPort: {{ $.Values.service.port }}
+          securityContext:
+            privileged: false
+          env:
+          {{- include "portal.env" . | nindent 12 -}}
+          {{- with $apps.env }}
+            - name: PORTAL_COORDINATES
+              value: {{ .coordinates | quote }}
+            - name: PORTAL_COUNTRY
+              value: {{ .country | quote }}
+            - name: PORTAL_NAME
+              value: "voyages.{{ .countryShort }}"
+          {{- end}}
+{{- end }}
+
