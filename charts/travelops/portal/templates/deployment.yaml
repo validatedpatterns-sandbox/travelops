@@ -6,7 +6,11 @@
 kind: Deployment
 apiVersion: apps/v1
 metadata:
+{{- if eq $apps.name "control" }}
+  name: {{ $apps.name }}
+{{- else }}
   name: {{ $apps.name }}-{{ $version }}
+{{- end }}
 spec:
   selector:
     matchLabels:
@@ -16,7 +20,11 @@ spec:
   template:
     metadata:
       annotations:
+      {{- if eq $apps.name "control" }}
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+      {{- else }}
       {{- include "portal.istioProxyConfig" . | nindent 8 }}
+      {{- end }}
       labels:
         app: {{ $apps.name }}
         version: {{ $version }}
@@ -27,10 +35,18 @@ spec:
           imagePullPolicy: {{ $img.pullPolicy }}
 {{- end }}
           ports:
+          {{- if eq $apps.name "control" }}
+            - containerPort: 8080
+          {{- else }}
             - containerPort: {{ $.Values.service.port }}
+          {{- end }}
           securityContext:
             privileged: false
           env:
+          {{- if eq $apps.name "control" }}
+            - name: PORTAL_SERVICES
+              value: "voyages.fr;http://voyages.travel-portal:8000,viaggi.it;http://viaggi.travel-portal:8000,travels.uk;http://travels.travel-portal:8000"
+          {{- else }}
           {{- include "portal.env" . | nindent 12 -}}
           {{- with $apps.env }}
             - name: PORTAL_COORDINATES
@@ -39,6 +55,7 @@ spec:
               value: {{ .country | quote }}
             - name: PORTAL_NAME
               value: "voyages.{{ .countryShort }}"
-          {{- end}}
+          {{- end }}
+          {{- end }}
 {{- end }}
 

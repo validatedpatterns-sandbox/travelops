@@ -1,17 +1,21 @@
-{{- range .Values.apps }}
+{{- range $apps := .Values.apps }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .name }}
+  name: {{ $apps.name }}
   labels:
-    app: {{ .name }}
+    app: {{ $apps.name }}
 spec:
   ports:
   {{- with $svc := $.Values.service }}
     - name: {{ $svc.name }}
+  {{- if eq $apps.name "control" }}
+      port: 8080
+  {{- else }}
       port: {{ $svc.port }}
   {{- end }}
+  {{- end }}
   selector:
-    app: {{ .name }}
+    app: {{ $apps.name }}
 {{- end }}
