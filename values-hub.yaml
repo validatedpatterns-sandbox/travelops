@@ -94,7 +94,7 @@ clusterGroup:
 
     mysql:
       name: mysql
-      namespace: dev-istio-system
+      namespace: dev-travel-agency
       project: travelops-dev
       path: charts/mysqldb
 
@@ -106,9 +106,15 @@ clusterGroup:
 
     services:
       name: travelops-services
-      namespace: dev-istio-system
+      namespace: dev-travel-agency
       project: travelops-dev
       path: charts/travelops/services
+    
+    portal:
+      name: travelops-portal
+      namespace: dev-travel-portal
+      project: travelops-dev
+      path: charts/travelops/portal
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm

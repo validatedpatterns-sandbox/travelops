@@ -64,6 +64,7 @@ Create the name of the service account to use
 {{/* Reusable istio proxy configs */}}
 {{- define "portal.istioProxyConfig" -}}
 readiness.status.sidecar.istio.io/applicationPorts: ""
+sidecar.istio.io/inject: "true"
 proxy.istio.io/config: |
   tracing:
     zipkin:
