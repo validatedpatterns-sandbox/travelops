@@ -40,14 +40,7 @@ spec:
             - name: DISCOUNTS_SERVICE
               value: "http://discounts.travel-agency:8000"
           {{- if eq $apps.name "travels" }}
-            - name: FLIGHTS_SERVICE
-              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
-            - name: HOTELS_SERVICE
-              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
-            - name: CARS_SERVICE
-              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
-            - name: INSURANCES_SERVICE
-              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
+          {{- include "services.travelsEnv" . | nindent 12 -}}
           {{- else if ne $apps.name "discounts" }}
           {{- include "services.mysqlEnv" . | nindent 12 -}}
           {{- end }}

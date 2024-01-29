@@ -70,13 +70,15 @@ proxy.istio.io/config: |
 {{- end }}
 
 
-{{- define "services.env" -}}
-- name: LISTEN_ADDRESS
-  value: ":8000"
-- name: DISCOUNTS_SERVICE
-  value: "http://discounts.travel-agency:8000"
-- name: MYSQL_SERVICE
-  value: "mysqldb.travel-agency:3306"
+{{- define "services.travelsEnv" }}
+- name: FLIGHTS_SERVICE
+  value: "http://flights.travel-agency:8000"
+- name: HOTELS_SERVICE
+  value: "http://hotels.travel-agency:8000"
+- name: CARS_SERVICE
+  value: "http://cars.travel-agency:8000"
+- name: INSURANCES_SERVICE
+  value: "http://insurances.travel-agency:8000"
 {{- end }}
   
 {{- define "services.mysqlEnv" }}
