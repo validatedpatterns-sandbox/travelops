@@ -73,13 +73,15 @@ proxy.istio.io/config: |
 {{- define "services.env" -}}
 - name: LISTEN_ADDRESS
   value: ":8000"
-- name: DISCOUNT_SERVICE
+- name: DISCOUNTS_SERVICE
   value: "http://discounts.travel-agency:8000"
 - name: MYSQL_SERVICE
   value: "mysqldb.travel-agency:3306"
 {{- end }}
   
 {{- define "services.mysqlEnv" }}
+- name: MYSQL_SERVICE
+  value: "mysqldb.travel-agency:3306"
 - name: MYSQL_USER
   value: "root"
 - name: MYSQL_PASSWORD

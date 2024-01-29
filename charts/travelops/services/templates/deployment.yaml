@@ -34,18 +34,20 @@ spec:
             - name: CURRENT_SERVICE
               value: {{ $apps.name | quote }}
             - name: CURRENT_VERSION
-              value: {{ $version }}
+              value: {{ $version | quote }}
             - name: LISTEN_ADDRESS
-              value: :8000
+              value: ":8000"
+            - name: DISCOUNTS_SERVICE
+              value: "http://discounts.travel-agency:8000"
           {{- if eq $apps.name "travels" }}
             - name: FLIGHTS_SERVICE
-              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
             - name: HOTELS_SERVICE
-              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
             - name: CARS_SERVICE
-              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
             - name: INSURANCES_SERVICE
-              value: http://{{ $apps.name }}.{{ $env }}-travel-agency:8000
+              value: "http://{{ $apps.name }}.{{ $env }}-travel-agency:8000"
           {{- else if ne $apps.name "discounts" }}
           {{- include "services.mysqlEnv" . | nindent 12 -}}
           {{- end }}
