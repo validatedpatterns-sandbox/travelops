@@ -31,7 +31,11 @@ spec:
     spec:
       containers:
         - name: {{ $apps.name }}
-          image: {{ $img.registry }}/{{ $img.repository }}/demo_travels_{{ $apps.name }}:{{ $img.tag }}
+        {{- if eq $apps.name "control" }}
+          image: {{ $img.registry }}/{{ $img.repository }}/demo_travels_control:{{ $img.tag }}
+        {{- else }}
+          image: {{ $img.registry }}/{{ $img.repository }}/demo_travels_portal:{{ $img.tag }}
+        {{- end }}
           imagePullPolicy: {{ $img.pullPolicy }}
 {{- end }}
           ports:
