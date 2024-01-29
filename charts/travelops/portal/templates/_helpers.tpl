@@ -89,6 +89,6 @@ proxy.istio.io/config: |
 {{- define "portal.env" -}}
 - name: LISTEN_ADDRESS
   value: :8000
-- name: TRAVEL_AGENCY_SERVICE
+- name: TRAVELS_AGENCY_SERVICE
   value: "http://travels.travel-agency:8000"
 {{- end }}
