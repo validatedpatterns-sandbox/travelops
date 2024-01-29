@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.appEnv }}-travel-control
 spec:
   hosts:
-    - istio-ingressgateway-{{ .Values.appEnv }}-istio-system.{{ .Values.global.localDomain }}
+    - istio-ingressgateway-{{ .Values.appEnv }}-istio-system.{{ .Values.global.localClusterDomain }}
   gateways:
     - {{ .Values.appEnv }}-istio-system/control-gateway
   http:
