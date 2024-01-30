@@ -84,11 +84,3 @@ proxy.istio.io/config: |
         header:
           name: travel
 {{- end}}
-
-{{/* Reusable environment variables for portal microservice */}}
-{{- define "portal.env" -}}
-- name: LISTEN_ADDRESS
-  value: :8000
-- name: TRAVELS_AGENCY_SERVICE
-  value: "http://travels.travel-agency:8000"
-{{- end }}
