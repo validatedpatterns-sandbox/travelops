@@ -57,14 +57,17 @@ spec:
             - name: PORTAL_SERVICES
               value: "voyages.fr;http://voyages.{{ $env }}-travel-portal:8000,viaggi.it;http://viaggi.{{ $env }}-travel-portal:8000,travels.uk;http://travels.{{ $env }}-travel-portal:8000"
           {{- else }}
-          {{- include "portal.env" . | nindent 12 -}}
           {{- with $apps.env }}
+            - name: LISTEN_ADDRESS
+              value: ":8000"
             - name: PORTAL_COORDINATES
               value: {{ .coordinates | quote }}
             - name: PORTAL_COUNTRY
               value: {{ .country | quote }}
             - name: PORTAL_NAME
               value: "{{ $apps.name }}.{{ .countryShort }}"
+            - name: TRAVELS_AGENCY_SERVICE
+              value: "http://travels.{{ $env }}-travel-agency:8000"
           {{- end }}
           {{- end }}
 {{- end }}
