@@ -8,7 +8,7 @@ apiVersion: apps/v1
 metadata:
 {{- if eq $apps.name "control" }}
   name: {{ $apps.name }}
-  namespace: {{ $appEnv }}-travel-control
+  namespace: {{ $env }}-travel-control
 {{- else }}
   name: {{ $apps.name }}-{{ $version }}
   namespace: {{ $env }}-travel-portal
