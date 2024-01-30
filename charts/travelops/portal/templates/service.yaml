@@ -1,9 +1,13 @@
 {{- range $apps := .Values.apps }}
+{{ $env := $.Values.appEnv }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $apps.name }}
+{{- if eq $apps.name "control" }}
+  namespace: {{ $env }}-travel-control
+{{- end }}
   labels:
     app: {{ $apps.name }}
 spec:
