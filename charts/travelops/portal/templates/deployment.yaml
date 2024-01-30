@@ -10,7 +10,7 @@ metadata:
   name: {{ $apps.name }}
   namespace: {{ $env }}-travel-control
 {{- else }}
-  name: {{ $apps.name }}-{{ $version }}
+  name: {{ $apps.name }}
   namespace: {{ $env }}-travel-portal
 {{- end }}
 spec:
@@ -32,7 +32,11 @@ spec:
         version: {{ $version }}
     spec:
       containers:
+        {{- if eq $apps.name "voyages" }}
         - name: {{ $apps.name }}
+        {{- else }}
+        - name: control
+        {{- end }}
         {{- if eq $apps.name "control" }}
           image: {{ $img.registry }}/{{ $img.repository }}/demo_travels_control:{{ $img.tag }}
         {{- else }}
@@ -51,7 +55,7 @@ spec:
           env:
           {{- if eq $apps.name "control" }}
             - name: PORTAL_SERVICES
-              value: "voyages.fr;http://voyages.travel-portal:8000,viaggi.it;http://viaggi.travel-portal:8000,travels.uk;http://travels.travel-portal:8000"
+              value: "voyages.fr;http://voyages.{{ $env }}-travel-portal:8000,viaggi.it;http://viaggi.{{ $env }}-travel-portal:8000,travels.uk;http://travels.{{ $env }}-travel-portal:8000"
           {{- else }}
           {{- include "portal.env" . | nindent 12 -}}
           {{- with $apps.env }}
@@ -60,7 +64,7 @@ spec:
             - name: PORTAL_COUNTRY
               value: {{ .country | quote }}
             - name: PORTAL_NAME
-              value: "voyages.{{ .countryShort }}"
+              value: "{{ $apps.name }}.{{ .countryShort }}"
           {{- end }}
           {{- end }}
 {{- end }}
