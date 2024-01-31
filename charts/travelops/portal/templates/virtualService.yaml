@@ -3,6 +3,8 @@ kind: VirtualService
 metadata:
   name: control
   namespace: {{ .Values.appEnv }}-travel-control
+  annotations:
+    argocd.argoproj.io/sync-options: Prune=true
 spec:
   hosts:
     - istio-ingressgateway-{{ .Values.appEnv }}-istio-system.{{ .Values.global.localClusterDomain }}
