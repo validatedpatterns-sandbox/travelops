@@ -60,3 +60,21 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+
+{{/* 
+ServiceMesh ControlPlane addOn settings 
+*/}}
+{{- define "servicemesh.addOns" }}
+grafana:
+  enabled: true
+jaeger:
+  install:
+    storage:
+      type: Memory
+kiali:
+  enabled: true
+prometheus:
+  enabled: true
+{{- end }}
+

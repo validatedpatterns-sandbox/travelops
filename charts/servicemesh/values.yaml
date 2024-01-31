@@ -6,6 +6,23 @@
 tracing:
   sampling: 10000
 
+#Jaeger Config
+jaeger:
+  strategy: production
+  storage:
+    type: elasticsearch
+    days: 7 #retention
+    schedule: '55 23 * * *'
+  elastic:
+    nodeCount: 1
+    storageSize: 1Gi
+    resources:
+      requests:
+        cpu: 200m
+        memory: 2Gi
+      limits:
+        memory: 2Gi
+
 #Service Mesh ControlPlane version
 version: v2.4
 
