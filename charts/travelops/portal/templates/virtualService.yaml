@@ -4,7 +4,8 @@ metadata:
   name: control
   namespace: {{ .Values.appEnv }}-travel-control
   annotations:
-    argocd.argoproj.io/sync-options: Prune=true
+    argocd.argoproj.io/sync-options: PruneLast=true
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   hosts:
     - istio-ingressgateway-{{ .Values.appEnv }}-istio-system.{{ .Values.global.localClusterDomain }}
