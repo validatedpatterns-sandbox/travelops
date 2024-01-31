@@ -81,7 +81,7 @@ proxy.istio.io/config: |
   value: "http://insurances.travel-agency:8000"
 {{- end }}
   
-{{- define "services.mysqlEnv" }}
+{{- define "services.mysqlEnv" -}}
 - name: MYSQL_SERVICE
   value: "mysqldb.travel-agency:3306"
 - name: MYSQL_USER

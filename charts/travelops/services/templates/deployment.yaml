@@ -32,17 +32,25 @@ spec:
             privileged: false
           env:
             - name: CURRENT_SERVICE
-              value: {{ $apps.name | quote }}
+              value: {{ $apps.name }}
             - name: CURRENT_VERSION
-              value: {{ $version | quote }}
+              value: {{ $version }}
             - name: LISTEN_ADDRESS
               value: ":8000"
+          {{- if ne $apps.name "discounts" }}
             - name: DISCOUNTS_SERVICE
-              value: "http://discounts.travel-agency:8000"
+              value: "http://discounts.{{ $env }}-travel-agency:8000"
+          {{- include "services.mysqlEnv" . | nindent 12 }}
+          {{- end }}
           {{- if eq $apps.name "travels" }}
-          {{- include "services.travelsEnv" . | nindent 12 -}}
-          {{- else if ne $apps.name "discounts" }}
-          {{- include "services.mysqlEnv" . | nindent 12 -}}
+            - name: FLIGHTS_SERVICE
+              value: "http://flights.{{ $env }}-travel-agency:8000"
+            - name: HOTELS_SERVICE
+              value: "http://hotels.{{ $env }}-travel-agency:8000"
+            - name: CARS_SERVICE
+              value: "http://cars.{{ $env }}-travel-agency:8000"
+            - name: INSURANCES_SERVICE
+              value: "http://insurances.{{ $env }}-travel-agency:8000"
           {{- end }}
 
 {{- end }}
