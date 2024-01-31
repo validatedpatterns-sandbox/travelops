@@ -2,7 +2,8 @@ apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
   name: control-gateway
-  namespace: 
+  annotations:
+    argocd.argoproj.io/sync-options: PruneLast=true
 spec:
   servers:
     - hosts:
