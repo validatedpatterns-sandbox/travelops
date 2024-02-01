@@ -4,6 +4,9 @@ metadata:
   name: dev-basic
   namespace: dev-istio-system
 spec:
+  gateways:
+    openshiftRoute:
+      enabled: false
   addons:
     grafana:
       enabled: true
