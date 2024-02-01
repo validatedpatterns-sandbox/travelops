@@ -3,7 +3,7 @@ kind: Service
 metadata:
   labels:
     {{- include "mysqldb.selectorLabels" . | nindent 4 }}
-  name: {{ include "mysqldb.fullname" . }}
+  name: mysqldb
 spec:
   ports:
   {{- with .Values.service }}
