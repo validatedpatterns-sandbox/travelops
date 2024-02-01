@@ -37,13 +37,6 @@ spec:
               value: {{ $version }}
             - name: LISTEN_ADDRESS
               value: ":8000"
-          {{- if ne $apps.name "discounts" }}
-            - name: DISCOUNTS_SERVICE
-              value: "http://discounts.{{ $env }}-travel-agency:8000"
-            - name: MYSQL_SERVICE
-              value: "mysqldb.{{ $env }}-travel-agency:3306"
-          {{- include "travel-agency.mysqlEnv" . | nindent 12 }}
-          {{- end }}
           {{- if eq $apps.name "travels" }}
             - name: FLIGHTS_SERVICE
               value: "http://flights.{{ $env }}-travel-agency:8000"
@@ -53,6 +46,13 @@ spec:
               value: "http://cars.{{ $env }}-travel-agency:8000"
             - name: INSURANCES_SERVICE
               value: "http://insurances.{{ $env }}-travel-agency:8000"
+          {{- end }}
+          {{- if and ( ne $apps.name "discounts" ) ( ne $apps.name "travels" ) }}
+            - name: DISCOUNTS_SERVICE
+              value: "http://discounts.{{ $env }}-travel-agency:8000"
+            - name: MYSQL_SERVICE
+              value: "mysqldb.{{ $env }}-travel-agency:3306"
+          {{- include "travel-agency.mysqlEnv" . | nindent 12 }}
           {{- end }}
 
 {{- end }}
