@@ -105,16 +105,22 @@ clusterGroup:
       path: charts/servicemesh
 
     services:
-      name: travelops-services
+      name: travel-agency
       namespace: dev-travel-agency
       project: travelops-dev
-      path: charts/travelops/services
+      path: charts/travelops/travel-agency
     
     portal:
-      name: travelops-portal
+      name: travel-portal
       namespace: dev-travel-portal
       project: travelops-dev
-      path: charts/travelops/portal
+      path: charts/travelops/travel-portal
+    
+    control:
+      name: travel-control
+      namespace: dev-travel-control
+      project: travelops-dev
+      path: charts/travelops/travel-control
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
