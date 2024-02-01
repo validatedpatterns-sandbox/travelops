@@ -1,0 +1,36 @@
+{{- $env := .Values.appEnv }}
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: control
+  namespace: {{ $env }}-travel-control
+spec:
+  selector:
+    matchLabels:
+      app: control
+      version: {{ .Values.appVersion }}
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: control
+        version: {{ .Values.appVersion }}
+    spec:
+      containers:
+      {{- with $img := .Values.image }}
+        - name: control
+          image: {{ $img.registry }}/{{ $img.repository }}/demo_travels_control:{{ $img.tag }}
+          imagePullPolicy: {{ $img.pullPolicy }}
+      {{- end }}
+          ports:
+            - containerPort: 8080
+          securityContext:
+            privileged: false
+          env:
+            - name: PORTAL_SERVICES
+              value: "voyages.fr;http://voyages.{{ $env }}-travel-portal:8000,viaggi.it;http://viaggi.{{ $env }}-travel-portal:8000,travels.uk;http://travels.{{ $env }}-travel-portal:8000"
+

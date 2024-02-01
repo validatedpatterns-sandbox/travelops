@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "portal.name" -}}
+{{- define "travel-control.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "portal.fullname" -}}
+{{- define "travel-control.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "portal.chart" -}}
+{{- define "travel-control.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "portal.labels" -}}
-helm.sh/chart: {{ include "portal.chart" . }}
-{{ include "portal.selectorLabels" . }}
+{{- define "travel-control.labels" -}}
+helm.sh/chart: {{ include "travel-control.chart" . }}
+{{ include "travel-control.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,42 +45,18 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "portal.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "portal.name" . }}
+{{- define "travel-control.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "travel-control.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "portal.serviceAccountName" -}}
+{{- define "travel-control.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "portal.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "travel-control.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
-
-{{/* Reusable istio proxy configs */}}
-{{- define "portal.istioProxyConfig" -}}
-readiness.status.sidecar.istio.io/applicationPorts: ""
-sidecar.istio.io/inject: "true"
-proxy.istio.io/config: |
-  tracing:
-    zipkin:
-      address: zipkin.istio-system:9411
-    sampling: 10
-    custom_tags:
-      http.header.portal:
-        header:
-          name: portal
-      http.header.device:
-        header:
-          name: device
-      http.header.user:
-        header:
-          name: user
-      http.header.travel:
-        header:
-          name: travel
-{{- end}}

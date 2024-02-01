@@ -1,24 +1,16 @@
 {{- range $apps := .Values.apps }}
-{{ $env := $.Values.appEnv }}
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: {{ $apps.name }}
-{{- if eq $apps.name "control" }}
-  namespace: {{ $env }}-travel-control
-{{- end }}
   labels:
     app: {{ $apps.name }}
 spec:
   ports:
   {{- with $svc := $.Values.service }}
     - name: {{ $svc.name }}
-  {{- if eq $apps.name "control" }}
-      port: 8080
-  {{- else }}
       port: {{ $svc.port }}
-  {{- end }}
   {{- end }}
   selector:
     app: {{ $apps.name }}

@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "services.name" -}}
+{{- define "travel-agency.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "services.fullname" -}}
+{{- define "travel-agency.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,27 +26,27 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "services.chart" -}}
+{{- define "travel-agency.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "services.labels" -}}
-{{ include "services.selectorLabels" . }}
+{{- define "travel-agency.labels" -}}
+{{ include "travel-agency.selectorLabels" . }}
 {{- end }}
 
 {{/*
 Selector labels
 */}}
-{{- define "services.selectorLabels" -}}
+{{- define "travel-agency.selectorLabels" -}}
 {{- end }}
 
 {{/* 
 Proxy config for istio (indent 8)
 */}}
-{{- define "services.istioProxyConfig" -}}
+{{- define "travel-agency.istioProxyConfig" -}}
 readiness.status.sidecar.istio.io/applicationPorts: ""
 sidecar.istio.io/inject: "true"
 proxy.istio.io/config: |
@@ -69,8 +69,7 @@ proxy.istio.io/config: |
           name: travel
 {{- end }}
 
-
-{{- define "services.travelsEnv" }}
+{{- define "travel-agency.travelsEnv" }}
 - name: FLIGHTS_SERVICE
   value: "http://flights.travel-agency:8000"
 - name: HOTELS_SERVICE
@@ -81,7 +80,7 @@ proxy.istio.io/config: |
   value: "http://insurances.travel-agency:8000"
 {{- end }}
   
-{{- define "services.mysqlEnv" -}}
+{{- define "travel-agency.mysqlEnv" -}}
 - name: MYSQL_SERVICE
   value: "mysqldb.travel-agency:3306"
 - name: MYSQL_USER

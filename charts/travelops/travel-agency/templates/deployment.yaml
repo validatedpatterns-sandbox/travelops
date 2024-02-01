@@ -16,7 +16,7 @@ spec:
   template:
     metadata:
       annotations:
-      {{- include "services.istioProxyConfig" . | nindent 8 }}
+      {{- include "travel-agency.istioProxyConfig" . | nindent 8 }}
       labels:
         app: {{ $apps.name }}
         version: {{ $version }}
@@ -40,7 +40,7 @@ spec:
           {{- if ne $apps.name "discounts" }}
             - name: DISCOUNTS_SERVICE
               value: "http://discounts.{{ $env }}-travel-agency:8000"
-          {{- include "services.mysqlEnv" . | nindent 12 }}
+          {{- include "travel-agency.mysqlEnv" . | nindent 12 }}
           {{- end }}
           {{- if eq $apps.name "travels" }}
             - name: FLIGHTS_SERVICE
