@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Values.appEnv }}-istio-system
   annotations:
     argocd.argoproj.io/hook: PostSync
-    maistra.io/manageRoute: false
+    maistra.io/manageRoute: 'false'
 spec:
   servers:
     - hosts:
