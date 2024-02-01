@@ -40,6 +40,8 @@ spec:
           {{- if ne $apps.name "discounts" }}
             - name: DISCOUNTS_SERVICE
               value: "http://discounts.{{ $env }}-travel-agency:8000"
+            - name: MYSQL_SERVICE
+              value: "mysqldb.{{ $env }}-travel-agency:3306"
           {{- include "travel-agency.mysqlEnv" . | nindent 12 }}
           {{- end }}
           {{- if eq $apps.name "travels" }}
