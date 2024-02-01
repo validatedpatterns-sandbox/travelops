@@ -5,6 +5,7 @@ metadata:
   namespace: {{ .Values.appEnv }}-istio-system
   annotations:
     argocd.argoproj.io/hook: PostSync
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
 spec:
   servers:
     - hosts:
