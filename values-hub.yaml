@@ -121,6 +121,11 @@ clusterGroup:
       namespace: dev-travel-control
       project: travelops-dev
       path: charts/travelops/travel-control
+      ignoreDifferences:
+      - group: route.openshift.io
+        kind: Route
+        jqPathExpression:
+          - '.status.ingress'
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
