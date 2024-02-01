@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: control-gateway
+  namespace: {{ .Values.appEnv }}-istio-system
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+spec:
+  servers:
+    - hosts:
+        - istio-ingressgateway-{{ .Values.appEnv }}-istio-system.{{ .Values.global.localClusterDomain }}
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
+  selector:
+    istio: ingressgateway
