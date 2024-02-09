@@ -1,19 +1,17 @@
-# Multicloud Gitops
+# TravelOps
 
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-[Live build status](https://validatedpatterns.io/ci/?pattern=mcgitops)
+[Pattern Support Policy(https://validatedpatterns.io/contribute/support-policies/)]
 
 ## Start Here
 
 If you've followed a link to this repository, but are not really sure what it contains
-or how to use it, head over to [Multicloud GitOps](https://validatedpatterns.io/patterns/multicloud-gitops/)
+or how to use it, head over to [TravelOps](https://validatedpatterns.io/patterns/travelops-ossm/)
 for additional context and installation instructions
 
-## Rationale
+## Quick Start
 
-The goal for this pattern is to:
-
-* Use a GitOps approach to manage hybrid and multi-cloud deployments across both public and private clouds.
-* Enable cross-cluster governance and application lifecycle management.
-* Securely manage secrets across the deployment.
+1. Fork this repository and clone to your local machine
+1. Change directories into `travelops`
+1. Run `./patterns.sh make install` to install the pattern
