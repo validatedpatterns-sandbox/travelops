@@ -1,6 +1,6 @@
 ---
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: control
   namespace: travel-control
@@ -28,7 +28,12 @@ spec:
           ports:
             - containerPort: 8080
           securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
             privileged: false
+            readOnlyRootFilesystem: true
           env:
             - name: PORTAL_SERVICES
               value: "voyages.fr;http://voyages.travel-portal:8000,viaggi.it;http://viaggi.travel-portal:8000,travels.uk;http://travels.travel-portal:8000"
