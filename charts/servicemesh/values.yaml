@@ -1,47 +1,61 @@
-# Default values for servicemesh.
+# Default values for controlplane.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
 global:
   localClusterDomain: ''
 
-appEnv: dev
+# Configure the certificate
+letsencrypt:
+  name: istio-ingressgateway
+  duration: "168h0m0s"
+  renewBefore: "28h0m0s"
+  usages:
+    - server auth
+  organizations:
+    - hybrid-cloud-patterns.io
 
-#Jaeger tracing configuration
-tracing:
-  sampling: 10000
-
-#Jaeger Config
-jaeger:
-  strategy: production
-  storage:
-    type: elasticsearch
-    days: 7 #retention
-    schedule: '55 23 * * *'
-  elastic:
-    nodeCount: 1
-    storageSize: 1Gi
-    resources:
-      requests:
-        cpu: 200m
-        memory: 2Gi
-      limits:
-        memory: 2Gi
-
-#Service Mesh ControlPlane version
-version: v2.4
-
-#mutual TLS (mTLS)configuration
-security:
-  controlPlane:
-    mtls: true
+# Choose the deployment strategy (environment: production | basic)
+# Change the sampling size (production strategy 20%)
+# when .controlPlane.deploymentStrategy == 'production' automtls/mtls are on by default.
+controlPlane:
+  deploymentStrategy: production
+  version: v2.4
+  profiles: default
   dataPlane:
-    automtls: true
-    mtls: true
+    automtls: ''
+    mtls: ''
 
-# ServiceMesh Membership 
-# This generates a serviceMeshMembership in each component namespace
-members:
-  - agency 
-  - control
-  - portal
+# Define the namespaces that belong in the service mesh
+# Use this when defining memberRoll outside of demo applications
+mesh:
+  members: {}
+
+# Enable mtls in serviceMeshControlPlane; enabled by default when .mesh.strategy is production
+security:
+  dataPlane:
+    automtls: false
+    mtls: false
+
+# Default sampling size for Jaeger is 100% (10000) 
+# jaeger sampling of 20% of all traffic is defined as 2000
+jaeger:
+  name: jaeger-small
+  storage: Elasticsearch
+  tracing:
+    sampling: 10000
+    type: Jaeger
+
+elasticsearch:
+  indexCleaner:
+    enabled: true
+    days: 7
+    schedule: '55 23 * * *'
+  nodeCount: 1
+  storage:
+    size: 1Gi
+  requests:
+    cpu: 200m
+    memory: 2Gi
+  limits:
+    memory: 2Gi
+  redundancyPolicy: ZeroRedundancy

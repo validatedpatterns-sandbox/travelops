@@ -1,34 +1,27 @@
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
-  name: dev-basic
-  namespace: dev-istio-system
+  name: {{ .Values.controlPlane.deploymentStrategy }}
 spec:
-  gateways:
-    openshiftRoute:
-      enabled: false
-  addons:
-    grafana:
-      enabled: true
-    kiali:
-      enabled: true
-    prometheus:
-      enabled: true
-    jaeger:
-     install:
-       storage:
-         type: Memory
-  {{- if eq .Values.appEnv "prod" }}
-       ingress:
-         enabled: true
-  {{- end }}
+  security:
+    dataPlane:
+{{- if eq .Values.controlPlane.deploymentStrategy "production" }}
+      automtls: true
+      mtls: true
+{{- else }}
+      automtls: {{ default true .Values.security.dataPlane.automls }}
+      mtls: {{ default true .Values.security.dataPlane.mtls }}
+{{- end }}
+{{- with $trace := .Values.jaeger.tracing }}
+  tracing:
+    sampling: {{ default 10000 $trace.sampling }}
+    type: {{ default "Jaeger" $trace.type }}
+{{- end }}
   general:
     logging:
       logAsJSON: true
-  policy:
-    type: Istiod
   profiles:
-  - default
+    - {{ .Values.controlPlane.profiles }}
   proxy:
     accessLogging:
       file:
@@ -38,15 +31,27 @@ spec:
         inbound: {}
         outbound:
           policy: REGISTRY_ONLY
-  security:
-    controlPlane:
-      mtls: {{ default true .Values.security.controlPlane.mtls }}
-    dataPlane:
-      automtls: {{ default true .Values.security.dataPlane.automtls }}
-      mtls: {{ default true .Values.security.dataPlane.mtls }}
+  policy:
+    type: Istiod
+  addons:
+    grafana:
+      enabled: true
+    jaeger:
+      name: {{ .Values.jaeger.name }}-{{ .Values.controlPlane.deploymentStrategy }}
+      install:
+    {{- if eq .Values.controlPlane.deploymentStrategy "production" }}
+        ingress:
+          enabled: true
+        storage:
+          type: {{ .Values.jaeger.storage }}
+    {{- else }}
+        storage:
+          type: Memory
+    {{- end }}
+    kiali:
+      enabled: true
+    prometheus:
+      enabled: true
+  version: {{ .Values.controlPlane.version }}
   telemetry:
     type: Istiod
-  tracing:
-    sampling: {{ .Values.tracing.sampling }}
-    type: Jaeger
-  version: {{ .Values.version }}

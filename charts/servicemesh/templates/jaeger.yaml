@@ -1,0 +1,33 @@
+{{- if eq .Values.controlPlane.deploymentStrategy "production" }}
+{{- $strategy := .Values.controlPlane.deploymentStrategy }}
+{{- with $jaeger := .Values.jaeger }}
+apiVersion: jaegertracing.io/v1
+kind: Jaeger
+metadata:
+  name: {{ $jaeger.name }}-{{ $strategy }}
+spec:
+  strategy: {{ $strategy }}
+  storage:
+    type: {{ $jaeger.storage | lower }}
+{{- end }}
+{{- with .Values.elasticsearch }}
+{{- $index := .indexCleaner }}
+    esIndexCleaner:
+      enabled: {{ $index.enabled }}
+      numberOfDays: {{ $index.days }}
+      schedule: {{ $index.schedule | squote }}
+{{- end }}
+{{- with $es := .Values.elasticsearch }}
+    elasticsearch:
+      nodeCount: {{ $es.nodeCount }}
+      storage:
+        size: {{ $es.storage.size }}
+      resources:
+        requests:
+          cpu: {{ $es.requests.cpu }}
+          memory: {{ $es.requests.memory }}
+        limits:
+          memory: {{ $es.requests.memory }}
+      redundancyPolicy: {{ $es.redundancyPolicy }}
+{{- end }}
+{{- end }}
