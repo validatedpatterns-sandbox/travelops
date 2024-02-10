@@ -12,10 +12,10 @@ clusterGroup:
     - openshift-distributed-tracing:
         operatorGroup: true
         targetNamespaces:
-    - dev-istio-system
-    - dev-travel-agency
-    - dev-travel-portal
-    - dev-travel-control
+    - istio-system
+    - travel-agency
+    - travel-portal
+    - travel-control
 
   subscriptions:
     acm:
@@ -94,32 +94,32 @@ clusterGroup:
 
     mysql:
       name: mysql
-      namespace: dev-travel-agency
-      project: travelops-dev
+      namespace: travel-agency
+      project: travelops
       path: charts/mysqldb
 
     servicemesh:
       name: servicemesh-controlplane
-      namespace: dev-istio-system
+      namespace: istio-system
       project: servicemesh
       path: charts/servicemesh
 
-    services:
+    agency: 
       name: travel-agency
-      namespace: dev-travel-agency
-      project: travelops-dev
+      namespace: travel-agency
+      project: travelops
       path: charts/travelops/travel-agency
     
     portal:
       name: travel-portal
-      namespace: dev-travel-portal
-      project: travelops-dev
+      namespace: travel-portal
+      project: travelops
       path: charts/travelops/travel-portal
     
     control:
       name: travel-control
-      namespace: dev-travel-control
-      project: travelops-dev
+      namespace: travel-control
+      project: travelops
       path: charts/travelops/travel-control
 
   imperative:

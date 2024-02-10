@@ -6,21 +6,21 @@
 # for all the limitations around it
 
 
-letsencrypt:
-  enabled: true
-  api_endpoint: true
-  # FIXME: tweak this to match your region
-  region: us-west-2
-  server: https://acme-v02.api.letsencrypt.org/directory
-  # server: https://acme-staging-v02.api.letsencrypt.org/directory
-  # FIXME: set this to your correct email
-  email: jonny@redhat.com
+#letsencrypt:
+#  enabled: true
+#  api_endpoint: true
+#  # FIXME: tweak this to match your region
+#  region: us-west-2
+#  server: https://acme-v02.api.letsencrypt.org/directory
+#  # server: https://acme-staging-v02.api.letsencrypt.org/directory
+#  # FIXME: set this to your correct email
+#  email: jonny@redhat.com
 
-clusterGroup:
-  applications:
-    letsencrypt:
-      name: letsencrypt
-      namespace: letsencrypt
-      # Using 'default' as that exists everywhere
-      project: default
-      path: common/letsencrypt
+#clusterGroup:
+#  applications:
+#    letsencrypt:
+#      name: letsencrypt
+#      namespace: letsencrypt
+#      # Using 'default' as that exists everywhere
+#      project: default
+#      path: common/letsencrypt
