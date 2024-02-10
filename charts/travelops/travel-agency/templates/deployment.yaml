@@ -1,10 +1,9 @@
 {{- range $apps := .Values.apps }}
 {{ $version := $.Values.appVersion }}
-{{ $env := $.Values.appEnv }}
 {{- with $img := $.Values.image }}
 ---
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
   name: {{ $apps.name }}-{{ $version }}
 spec:
@@ -16,7 +15,9 @@ spec:
   template:
     metadata:
       annotations:
+      {{- if ne $apps.name "insurances" }}
       {{- include "travel-agency.istioProxyConfig" . | nindent 8 }}
+      {{- end }}
       labels:
         app: {{ $apps.name }}
         version: {{ $version }}
@@ -29,7 +30,12 @@ spec:
           ports:
             - containerPort: {{ $.Values.service.port }}
           securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
             privileged: false
+            readOnlyRootFilesystem: true
           env:
             - name: CURRENT_SERVICE
               value: {{ $apps.name }}
@@ -39,19 +45,19 @@ spec:
               value: ":8000"
           {{- if eq $apps.name "travels" }}
             - name: FLIGHTS_SERVICE
-              value: "http://flights.{{ $env }}-travel-agency:8000"
+              value: "http://flights.travel-agency:8000"
             - name: HOTELS_SERVICE
-              value: "http://hotels.{{ $env }}-travel-agency:8000"
+              value: "http://hotels.travel-agency:8000"
             - name: CARS_SERVICE
-              value: "http://cars.{{ $env }}-travel-agency:8000"
+              value: "http://cars.travel-agency:8000"
             - name: INSURANCES_SERVICE
-              value: "http://insurances.{{ $env }}-travel-agency:8000"
+              value: "http://insurances.travel-agency:8000"
           {{- end }}
           {{- if and ( ne $apps.name "discounts" ) ( ne $apps.name "travels" ) }}
             - name: DISCOUNTS_SERVICE
-              value: "http://discounts.{{ $env }}-travel-agency:8000"
+              value: "http://discounts.travel-agency:8000"
             - name: MYSQL_SERVICE
-              value: "mysqldb.{{ $env }}-travel-agency:3306"
+              value: "mysqldb.travel-agency:3306"
           {{- include "travel-agency.mysqlEnv" . | nindent 12 }}
           {{- end }}
 

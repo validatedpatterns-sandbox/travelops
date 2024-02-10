@@ -1,13 +1,12 @@
 {{- range $apps := .Values.apps }}
 {{ $version := $.Values.appVersion }}
-{{ $env := $.Values.appEnv }}
 {{- with $img := $.Values.image }}
 ---
-kind: Deployment
 apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: {{ $apps.name }}
-  namespace: {{ $env }}-travel-portal
+  name: {{ $apps.name }}-{{ $version }}
+  namespace: travel-portal
 spec:
   selector:
     matchLabels:
@@ -33,7 +32,12 @@ spec:
           ports:
             - containerPort: {{ $.Values.service.port }}
           securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
             privileged: false
+            readOnlyRootFilesystem: true
           env:
           {{- with $apps.env }}
             - name: LISTEN_ADDRESS
@@ -45,7 +49,7 @@ spec:
             - name: PORTAL_NAME
               value: "{{ $apps.name }}.{{ .countryShort }}"
             - name: TRAVELS_AGENCY_SERVICE
-              value: "http://travels.{{ $env }}-travel-agency:8000"
+              value: "http://travels.travel-agency:8000"
           {{- end }}
 {{- end }}
 {{- end }}
