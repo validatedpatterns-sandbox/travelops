@@ -47,8 +47,6 @@ Selector labels
 Proxy config for istio (indent 8)
 */}}
 {{- define "travel-agency.istioProxyConfig" -}}
-readiness.status.sidecar.istio.io/applicationPorts: ""
-sidecar.istio.io/inject: "true"
 proxy.istio.io/config: |
   tracing:
     zipkin:

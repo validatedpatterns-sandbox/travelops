@@ -16,6 +16,9 @@ spec:
   template:
     metadata:
       annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+      {{- if $.Values.sidecarAutoInjection }}
+        sidecar.istio.io/inject: "true"
       {{- include "travel-portal.istioProxyConfig" . | nindent 8 }}
       labels:
         app: {{ $apps.name }}

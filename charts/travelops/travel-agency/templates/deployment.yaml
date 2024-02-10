@@ -15,6 +15,10 @@ spec:
   template:
     metadata:
       annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+      {{- if $.Values.sidecarAutoInjection }}
+        sidecar.istio.io/inject: "true"
+      {{- end }}
       {{- if ne $apps.name "insurances" }}
       {{- include "travel-agency.istioProxyConfig" . | nindent 8 }}
       {{- end }}

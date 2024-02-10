@@ -2,6 +2,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# Enable Auto sidecar injection for travel apps
+sidecarAutoInjection: true
+
 replicaCount: 1
 
 image:
@@ -38,7 +41,6 @@ resources: {}
   #   memory: 128Mi
 
 appVersion: v1
-appEnv: dev
 
 apps:
   - name: cars

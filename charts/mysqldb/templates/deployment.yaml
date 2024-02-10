@@ -12,7 +12,10 @@ spec:
   template:
     metadata:
       annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+      {{- if .Values.sidecarAutoInjection }}
         sidecar.istio.io/inject: "true"
+      {{- end }}
       labels:
       {{- include "mysqldb.labels" . | nindent 8 }}
     spec:
