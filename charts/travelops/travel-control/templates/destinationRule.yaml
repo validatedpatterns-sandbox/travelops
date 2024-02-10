@@ -2,10 +2,10 @@ apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
   name: control
-  namespace: {{ .Values.appEnv }}-travel-control
+  namespace: travel-control
 spec:
-  host: control.{{ .Values.appEnv }}-travel-control.svc.cluster.local
+  host: control.travel-control.svc.cluster.local
   subsets:
     - labels:
-        version: v1
+        version: {{ .Values.appVersion }}
       name: v1

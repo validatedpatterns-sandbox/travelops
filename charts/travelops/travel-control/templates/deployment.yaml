@@ -1,10 +1,9 @@
-{{- $env := .Values.appEnv }}
 ---
 kind: Deployment
 apiVersion: apps/v1
 metadata:
   name: control
-  namespace: {{ $env }}-travel-control
+  namespace: travel-control
 spec:
   selector:
     matchLabels:
@@ -32,5 +31,5 @@ spec:
             privileged: false
           env:
             - name: PORTAL_SERVICES
-              value: "voyages.fr;http://voyages.{{ $env }}-travel-portal:8000,viaggi.it;http://viaggi.{{ $env }}-travel-portal:8000,travels.uk;http://travels.{{ $env }}-travel-portal:8000"
+              value: "voyages.fr;http://voyages.travel-portal:8000,viaggi.it;http://viaggi.travel-portal:8000,travels.uk;http://travels.travel-portal:8000"
 
