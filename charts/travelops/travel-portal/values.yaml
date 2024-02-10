@@ -1,12 +1,18 @@
 # Default values for services.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-#
+
+# Global parameters for the jaeger resource
+global:
+  localClusterDomain: ''
+  jaeger:
+    name:  jaeger-production
+
 # Enable auto sidecar injection
 sidecarAutoInjection: true
 
-global:
-  localClusterDomain: ''
+# Enable jaeger sidecar
+sidecarJaeger: true
 
 replicaCount: 1
 

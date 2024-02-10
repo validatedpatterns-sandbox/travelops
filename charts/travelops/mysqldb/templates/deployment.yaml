@@ -16,6 +16,9 @@ spec:
       {{- if .Values.sidecarAutoInjection }}
         sidecar.istio.io/inject: "true"
       {{- end }}
+      {{- if .Values.sidecarJaeger }}
+        sidecar.jaegertracing.io/inject: {{ .Values.global.jaeger.name | quote }}
+      {{- end }}
       labels:
       {{- include "mysqldb.labels" . | nindent 8 }}
     spec:

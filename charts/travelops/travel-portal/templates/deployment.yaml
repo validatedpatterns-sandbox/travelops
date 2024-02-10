@@ -19,6 +19,10 @@ spec:
         readiness.status.sidecar.istio.io/applicationPorts: ""
       {{- if $.Values.sidecarAutoInjection }}
         sidecar.istio.io/inject: "true"
+      {{- end }}
+      {{- if $.Values.sidecarJaeger }}
+        sidecar.jaegertracing.io/inject: {{ $.Values.global.jaeger.name | quote }}
+      {{- end }}
       {{- include "travel-portal.istioProxyConfig" . | nindent 8 }}
       labels:
         app: {{ $apps.name }}

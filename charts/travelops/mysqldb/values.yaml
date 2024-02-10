@@ -1,9 +1,17 @@
 # Default values for mysqldb.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-#
+
+# Global parameters for the jaeger resource
+global:
+  jaeger:
+    name:  jaeger-production
+
 # Enable Auto sidecar injection for travel apps
 sidecarAutoInjection: true
+
+# Enable jaeger sidecar
+sidecarJaeger: true
 
 replicaCount: 1
 

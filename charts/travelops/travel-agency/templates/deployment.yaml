@@ -19,6 +19,9 @@ spec:
       {{- if $.Values.sidecarAutoInjection }}
         sidecar.istio.io/inject: "true"
       {{- end }}
+      {{- if $.Values.sidecarJaeger }}
+        sidecar.jaegertracing.io/inject: {{ $.Values.global.jaeger.name | quote }}
+      {{- end }}
       {{- if ne $apps.name "insurances" }}
       {{- include "travel-agency.istioProxyConfig" . | nindent 8 }}
       {{- end }}
