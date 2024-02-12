@@ -61,20 +61,81 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
-
-{{/* 
-ServiceMesh ControlPlane addOn settings 
+{{/*
+We are defining various components of the servicemesh controlplane spec. Including 
+addons, gateways and runtime configurations. 
 */}}
-{{- define "servicemesh.addOns" }}
+{{- define "servicemesh.gateways" }}
+gateways:
+  egress:
+    enabled: {{ .Values.gateways.egress.enabled }}
+    runtime:
+      deployment:
+        autoScaling:
+          enabled: {{ .Values.gateways.egress.autoscaling.enabled }}
+          maxReplicas: {{ .Values.gateways.egress.autoscaling.maxReplicas }}
+          minReplicas: {{ .Values.gateways.egress.autoscaling.minReplicas }}
+      pod: {}
+    service: {}
+  enabled: {{ .Values.gateways.enabled }}
+  ingress:
+    enabled: {{ .Values.gateways.ingress.enabled }}
+    runtime:
+      deployment:
+        autoScaling:
+          enabled: {{ .Values.gateways.ingress.autoscaling.enabled }}
+          maxReplicas: {{ .Values.gateways.ingress.autoscaling.maxReplicas }}
+          minReplicas: {{ .Values.gateways.ingress.autoscaling.minReplicas }}
+      pod: {}
+    service: {}
+  openshiftRoute:
+    enabled: {{ .Values.gateways.openshiftRoute.enabled }}
+{{- end }}
+
+{{- define "servicemesh.addons" }}
 grafana:
-  enabled: true
-jaeger:
+  enabled: {{ .Values.grafana.enabled }}
   install:
+    config:
+      env: {}
+      envSecrets: {}
+    persistence:
+      enabled: {{ .Values.grafana.persistence.enabled }}
+      storageClassName: {{ .Values.grafana.persistence.storageClassName | quote }}
+      accessMode: {{ .Values.grafana.persistence.accessMode }}
+      capacity:
+        requests:
+          storage: {{ .Values.grafana.persistence.capacity.requests.storage }}
+    service:
+      ingress:
+        contextPath: /grafana
+        tls:
+          termination: {{ .Values.grafana.service.ingress.tls.termination }} 
+jaeger:
+  name: jaeger-{{ .Values.global.jaeger.strategy }}
+  install:
+    ingress:
+      enabled: true
     storage:
-      type: Memory
+      type: {{ .Values.jaeger.storage }}
 kiali:
   enabled: true
 prometheus:
   enabled: true
 {{- end }}
 
+{{- define "servicemesh.runtime" }}
+components:
+  pilot:
+    deployment:
+      replicas: {{ .Values.pilot.deployment.replicas }}
+    pod:
+      affinity: {}
+    container: {}
+  grafana:
+    deployment: {}
+    pod: {}
+  kiali:
+    deployment: {}
+    pod: {}
+{{- end }}

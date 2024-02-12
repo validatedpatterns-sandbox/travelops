@@ -3,8 +3,6 @@ clusterGroup:
   isHubCluster: true
 
   namespaces:
-    - cert-manager-operator
-    - cert-manager
     - open-cluster-management
     - vault
     - golang-external-secrets
@@ -25,10 +23,6 @@ clusterGroup:
       namespace: open-cluster-management
       channel: release-2.9
       #csv: advanced-cluster-management.v2.6.1
-
-    cert-manager:
-      name: openshift-cert-manager-operator
-      namespace: cert-manager-operator
 
     elasticsearch:
       name: elasticsearch-operator
@@ -97,14 +91,8 @@ clusterGroup:
       project: hub
       path: common/golang-external-secrets
 
-    cert-manager:
-      name: cert-manager
-      namespace: cert-manager
-      project: servicemesh
-      path: charts/cert-manager/
-      
     mysql:
-      name: mysql
+      name: mysqldb
       namespace: travel-agency
       project: travelops
       path: charts/travelops/mysqldb

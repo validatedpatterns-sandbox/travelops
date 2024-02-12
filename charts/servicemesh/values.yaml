@@ -1,45 +1,83 @@
 # Default values for controlplane.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+#
+# START of Global Value declaration
 global:
   localClusterDomain: ''
 
-# Configure the certificate
-letsencrypt:
-  name: istio-ingressgateway
-  duration: "168h0m0s"
-  renewBefore: "28h0m0s"
-  usages:
-    - server auth
-  organizations:
-    - hybrid-cloud-patterns.io
+  jaeger:
+    strategy: production
 
-# Choose the deployment strategy (environment: production | basic)
-# Change the sampling size (production strategy 20%)
-# when .controlPlane.deploymentStrategy == 'production' automtls/mtls are on by default.
-controlPlane:
-  deploymentStrategy: production
+# END of Global Values
+
+# Configure servicemesh controlplane version and profile to use
+smcp:
   version: v2.4
   profiles: default
-  dataPlane:
-    automtls: ''
-    mtls: ''
 
 # Define the namespaces that belong in the service mesh
 # Use this when defining memberRoll outside of demo applications
 mesh:
   members: {}
 
-# Enable mtls in serviceMeshControlPlane; enabled by default when .mesh.strategy is production
+# Enable or disable mtls and automtls. BOTH ARE DEFAULT ENABLED
 security:
   dataPlane:
-    automtls: false
-    mtls: false
+    automtls: ''
+    mtls: ''
+
+# Configure proxy resources requests and limits
+proxy:
+ requests:
+   cpu: 100m
+   memory: 128Mi
+ limits:
+   cpu: 500m
+   memory: 128Mi
+
+# Configure ingress/egress gateways 
+gateways:
+  enabled: true
+  egress:
+    enabled: true
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 2
+  ingress:
+    enabled: true
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 2
+  openshiftRoute:
+    enabled: false
+
+# Configure Grafana addon resources
+grafana:
+  enabled: true
+  persistence:
+    enabled: true
+    storageClassName: ""
+    accessMode: ReadWriteOnce
+    capacity:
+      requests:
+        storage: 5Gi
+  service:
+    ingress:
+      contextPath: /grafana
+      tls:
+        termination: reencrypt
+      
+# Define runtime resources
+pilot:
+  deployment:
+    replicas: 2
 
 # Default sampling size for Jaeger is 100% (10000) 
 # jaeger sampling of 20% of all traffic is defined as 2000
 jaeger:
-  name: jaeger-small
   storage: Elasticsearch
   tracing:
     sampling: 10000

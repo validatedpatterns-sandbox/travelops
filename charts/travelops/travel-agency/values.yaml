@@ -5,7 +5,7 @@
 # Global parameters for the jaeger resource
 global:
   jaeger:
-    name:  jaeger-production
+    strategy: production
 
 # Enable Auto sidecar injection for travel apps
 sidecarAutoInjection: true

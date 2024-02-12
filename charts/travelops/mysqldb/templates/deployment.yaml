@@ -17,7 +17,7 @@ spec:
         sidecar.istio.io/inject: "true"
       {{- end }}
       {{- if .Values.sidecarJaeger }}
-        sidecar.jaegertracing.io/inject: {{ .Values.global.jaeger.name | quote }}
+        sidecar.jaegertracing.io/inject: "jaeger-{{ .Values.global.jaeger.strategy }}"
       {{- end }}
       labels:
       {{- include "mysqldb.labels" . | nindent 8 }}

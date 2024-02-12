@@ -7,6 +7,8 @@ kind: Deployment
 metadata:
   name: {{ $apps.name }}-{{ $version }}
   namespace: travel-portal
+  labels:
+    app: {{ $apps.name }}
 spec:
   selector:
     matchLabels:
@@ -21,7 +23,7 @@ spec:
         sidecar.istio.io/inject: "true"
       {{- end }}
       {{- if $.Values.sidecarJaeger }}
-        sidecar.jaegertracing.io/inject: {{ $.Values.global.jaeger.name | quote }}
+        sidecar.jaegertracing.io/inject: "jaeger-{{ $.Values.global.jaeger.strategy }}"
       {{- end }}
       {{- include "travel-portal.istioProxyConfig" . | nindent 8 }}
       labels:

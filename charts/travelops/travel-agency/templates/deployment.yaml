@@ -6,6 +6,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ $apps.name }}-{{ $version }}
+  labels:
+    app: ${ $apps.name }}
 spec:
   selector:
     matchLabels:
@@ -20,7 +22,7 @@ spec:
         sidecar.istio.io/inject: "true"
       {{- end }}
       {{- if $.Values.sidecarJaeger }}
-        sidecar.jaegertracing.io/inject: {{ $.Values.global.jaeger.name | quote }}
+        sidecar.jaegertracing.io/inject: "jaeger-{{ $.Values.global.jaeger.strategy }}"
       {{- end }}
       {{- if ne $apps.name "insurances" }}
       {{- include "travel-agency.istioProxyConfig" . | nindent 8 }}

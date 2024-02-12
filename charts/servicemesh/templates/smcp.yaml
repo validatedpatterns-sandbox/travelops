@@ -1,17 +1,12 @@
 apiVersion: maistra.io/v2
 kind: ServiceMeshControlPlane
 metadata:
-  name: {{ .Values.controlPlane.deploymentStrategy }}
+  name: production
 spec:
   security:
     dataPlane:
-{{- if eq .Values.controlPlane.deploymentStrategy "production" }}
-      automtls: true
-      mtls: true
-{{- else }}
-      automtls: {{ default true .Values.security.dataPlane.automls }}
+      automtls: {{ default true .Values.security.dataPlane.automtls }}
       mtls: {{ default true .Values.security.dataPlane.mtls }}
-{{- end }}
 {{- with $trace := .Values.jaeger.tracing }}
   tracing:
     sampling: {{ default 10000 $trace.sampling }}
@@ -21,8 +16,17 @@ spec:
     logging:
       logAsJSON: true
   profiles:
-    - {{ .Values.controlPlane.profiles }}
+    - {{ .Values.smcp.profiles }}
   proxy:
+    runtime:
+      container:
+        resources:
+          requests:
+            cpu: {{ .Values.proxy.requests.cpu }}
+            memory: {{ .Values.proxy.requests.memory }}
+          limits:
+            cpu: {{ .Values.proxy.limits.cpu }}
+            memory: {{ .Values.proxy.limits.memory }}
     accessLogging:
       file:
         name: /dev/stdout
@@ -31,27 +35,13 @@ spec:
         inbound: {}
         outbound:
           policy: REGISTRY_ONLY
+{{- include "servicemesh.gateways" . | indent 2 }}
   policy:
     type: Istiod
   addons:
-    grafana:
-      enabled: true
-    jaeger:
-      name: {{ .Values.jaeger.name }}-{{ .Values.controlPlane.deploymentStrategy }}
-      install:
-    {{- if eq .Values.controlPlane.deploymentStrategy "production" }}
-        ingress:
-          enabled: true
-        storage:
-          type: {{ .Values.jaeger.storage }}
-    {{- else }}
-        storage:
-          type: Memory
-    {{- end }}
-    kiali:
-      enabled: true
-    prometheus:
-      enabled: true
-  version: {{ .Values.controlPlane.version }}
+{{- include "servicemesh.addons" . | indent 4 }}
+  runtime:
+{{- include "servicemesh.runtime" . | indent 4 }}
+  version: {{ .Values.smcp.version }}
   telemetry:
     type: Istiod
