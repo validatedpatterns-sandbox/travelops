@@ -3,6 +3,8 @@ clusterGroup:
   isHubCluster: true
 
   namespaces:
+    - cert-manager-operator
+    - cert-manager
     - open-cluster-management
     - vault
     - golang-external-secrets
@@ -24,6 +26,10 @@ clusterGroup:
       channel: release-2.9
       #csv: advanced-cluster-management.v2.6.1
 
+    cert-manager:
+      name: openshift-cert-manager-operator
+      namespace: cert-manager-operator
+
     elasticsearch:
       name: elasticsearch-operator
       namespace: openshift-operators-redhat
@@ -44,8 +50,6 @@ clusterGroup:
     - hub
     - servicemesh
     - travelops
-    - travelops-dev
-    - travelops-prod
 
   # Explicitly mention the cluster-state based overrides we plan to use for this pattern.
   # We can use self-referential variables because the chart calls the tpl function with these variables defined
@@ -93,6 +97,12 @@ clusterGroup:
       project: hub
       path: common/golang-external-secrets
 
+    cert-manager:
+      name: cert-manager
+      namespace: cert-manager
+      project: servicemesh
+      path: charts/cert-manager/
+      
     mysql:
       name: mysql
       namespace: travel-agency

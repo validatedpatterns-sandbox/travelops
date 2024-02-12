@@ -4,11 +4,11 @@ metadata:
   name: istio-ca
   namespace: istio-system
   annotations:
-    argocd.argoproj.io/sync-options: ServerSideApply=true, Validate=false, SkipDryRunOnMissingResource=true
+    argocd.argoproj.io/sync-options: Validate=false, SkipDryRunOnMissingResource=true
     argocd.argoproj.io/sync-wave: "6"
 spec:
   isCA: true
-  duration: 21600h
+  duration: "21600h0m0s"
   secretName: istio-ca
   commonName: istio-ca.my-company.net
   subject:
