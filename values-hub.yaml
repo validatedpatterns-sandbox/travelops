@@ -43,6 +43,7 @@ clusterGroup:
   projects:
     - hub
     - servicemesh
+    - travelops
     - travelops-dev
     - travelops-prod
 
@@ -96,7 +97,7 @@ clusterGroup:
       name: mysql
       namespace: travel-agency
       project: travelops
-      path: charts/mysqldb
+      path: charts/travelops/mysqldb
 
     servicemesh:
       name: servicemesh-controlplane
