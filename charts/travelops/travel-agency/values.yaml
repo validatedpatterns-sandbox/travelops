@@ -22,6 +22,9 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: v1
 
+job:
+  image: image-registry.openshift-image-registry.svc:5000/openshift/cli
+
 securityContext: {}
   # capabilities:
   #   drop:
