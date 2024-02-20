@@ -81,3 +81,22 @@ proxy.istio.io/config: |
         header:
           name: travel
 {{- end}}
+
+{{- define "travel-portal.rolloutRestart" }}
+#!/bin/bash
+
+RUNNING=2
+for apps in travels voyages viaggi;  do
+    NS=travel-portal
+    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+  while [[ ${COUNT} != 2 ]]; do
+    sleep 20
+    echo "restarting deployment rollout for ${apps} in ${NS}"
+    echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
+    kubectl rollout restart deploy -l app=${apps} -n ${NS}
+    done
+    echo "done"
+
+  echo "All Set, no restart required in ${NS}"
+done
+{{- end }}
