@@ -95,31 +95,31 @@ clusterGroup:
       name: mysqldb
       namespace: travel-agency
       project: travelops
-      path: charts/travelops/mysqldb
+      path: charts/all/travelops/mysqldb
 
     servicemesh:
       name: servicemesh-controlplane
       namespace: istio-system
       project: servicemesh
-      path: charts/servicemesh
+      path: charts/all/servicemesh
 
     agency: 
       name: travel-agency
       namespace: travel-agency
       project: travelops
-      path: charts/travelops/travel-agency
+      path: charts/all/travelops/travel-agency
     
     portal:
       name: travel-portal
       namespace: travel-portal
       project: travelops
-      path: charts/travelops/travel-portal
+      path: charts/all/travelops/travel-portal
     
     control:
       name: travel-control
       namespace: travel-control
       project: travelops
-      path: charts/travelops/travel-control
+      path: charts/all/travelops/travel-control
 
   imperative:
     # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
