@@ -87,10 +87,12 @@ for apps in cars discounts flights insurances mysqldb travels hotels;  do
     NS=travel-agency
     COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
   while [[ ${COUNT} != 2 ]]; do
-    sleep 20
+    sleep 5
     echo "restarting deployment rollout for ${apps} in ${NS}"
     echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
     kubectl rollout restart deploy -l app=${apps} -n ${NS}
+    sleep 15
+    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
     done
     echo "done"
 

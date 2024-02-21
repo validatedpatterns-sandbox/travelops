@@ -5,4 +5,4 @@ metadata:
   namespace: travel-agency
 data:
   rollout-restart.sh: |
-{{ include "travel-agency.rolloutRestart" . | indent 4 }}
+{{- include "travel-agency.rolloutRestart" . | indent 4 }}

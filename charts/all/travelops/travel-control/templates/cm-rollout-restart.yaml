@@ -5,4 +5,4 @@ metadata:
   namespace: travel-control
 data:
   rollout-restart.sh: |
-{{ include "travel-control.rolloutRestart" . | indent 4 }}
+{{- include "travel-control.rolloutRestart" . | indent 4 }}

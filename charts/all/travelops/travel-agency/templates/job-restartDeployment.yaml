@@ -24,5 +24,5 @@ spec:
             name: rollout-restart
       dnsPolicy: ClusterFirst
       restartPolicy: Never
-      serviceAccount: {{ .Values.serviceAccountName }}
+      serviceAccount: {{ .Values.rbac.serviceAccountName }}
       terminationGracePeriodSeconds: 400

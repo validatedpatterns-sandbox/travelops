@@ -52,3 +52,6 @@ apps:
       coordinates: 55.956245,-3.187915
       country: United Kingdom
       countryShort: uk
+
+rbac:
+  serviceAccountName: travelops-sa
