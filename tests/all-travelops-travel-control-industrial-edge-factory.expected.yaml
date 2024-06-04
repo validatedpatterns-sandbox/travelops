@@ -1,0 +1,211 @@
+---
+# Source: travel-control/templates/sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: travelops-sa
+  namespace: travel-control
+---
+# Source: travel-control/templates/cm-rollout-restart.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rollout-restart
+  namespace: travel-control
+data:
+  rollout-restart.sh: |    
+    #!/bin/bash
+    
+    RUNNING=2
+    for apps in control;  do
+        NS=travel-control
+        COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+      while [[ ${COUNT} != 2 ]]; do
+        sleep 5
+        echo "restarting deployment rollout for ${apps} in ${NS}"
+        echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
+        kubectl rollout restart deploy -l app=${apps} -n ${NS}
+        sleep 5
+        COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+        done
+        echo "done"
+    
+      echo "All Set, no restart required in ${NS}"
+    done
+---
+# Source: travel-control/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: travelops-control-role
+  namespace: travel-control
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+---
+# Source: travel-control/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: travelops-control-rolebinding
+  namespace: travel-control
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: travelops-control-role
+subjects:
+- kind: ServiceAccount
+  name: travelops-sa
+  namespace: travel-control
+---
+# Source: travel-control/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: control
+  namespace: travel-control
+  labels:
+    app: control
+spec:
+  ports:
+    - name: http
+      port: 8080
+  selector:
+    app: control
+---
+# Source: travel-control/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: control
+  namespace: travel-control
+  labels:
+    app: control
+spec:
+  selector:
+    matchLabels:
+      app: control
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+      labels:
+        app: control
+        version: v1
+    spec:
+      containers:
+        - name: control
+          image: quay.io/kiali/demo_travels_control:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: PORTAL_SERVICES
+              value: "voyages.fr;http://voyages.travel-portal:8000,viaggi.it;http://viaggi.travel-portal:8000,travels.uk;http://travels.travel-portal:8000"
+---
+# Source: travel-control/templates/job-restartDeployment.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+  name: rollout-restart
+  namespace: travel-control
+spec:
+  template:
+    spec:
+      containers:
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli
+        name: rollout-restart
+        command:
+          - /bin/bash
+          - '/usr/local/bin/rollout-restart.sh'
+        volumeMounts:
+        - mountPath: /usr/local/bin/rollout-restart.sh
+          name: rollout-restart
+          subPath: rollout-restart.sh
+      volumes:
+        - name: rollout-restart
+          configMap:
+            name: rollout-restart
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: travelops-sa
+      terminationGracePeriodSeconds: 400
+---
+# Source: travel-control/templates/destinationRule.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: control
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true, Validate=false  
+    argocd.argoproj.io/sync-wave: "5"
+spec:
+  host: control.travel-control.svc.cluster.local
+  subsets:
+    - labels:
+        version: v1
+      name: v1
+---
+# Source: travel-control/templates/memberRoll.yaml
+apiVersion: maistra.io/v1
+kind: ServiceMeshMemberRoll
+metadata:
+  name: default
+  namespace: istio-system
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true, Validate=false
+    argocd.argoproj.io/sync-wave: "-5"
+spec:
+  members:
+  - travel-portal
+  - travel-control
+  - travel-agency
+---
+# Source: travel-control/templates/virtualService.yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: control
+  annotations:
+    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true, Validate=false
+    argocd.argoproj.io/sync-wave: "8"
+spec:
+  hosts:
+    - istio-ingressgateway-istio-system.apps.region.example.com
+  gateways:
+    - istio-system/control-gateway
+  http:
+    - route:
+        - destination:
+            host: control.travel-control.svc.cluster.local
+            subset: v1
+          weight: 100

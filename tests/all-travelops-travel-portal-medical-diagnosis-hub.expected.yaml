@@ -1,0 +1,348 @@
+---
+# Source: travel-portal/templates/sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: travelops-sa
+  namespace: travel-portal
+---
+# Source: travel-portal/templates/cm-rollout-restart.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rollout-restart
+  namespace: travel-portal
+data:
+  rollout-restart.sh: |    
+    #!/bin/bash
+    
+    RUNNING=2
+    for apps in travels voyages viaggi;  do
+        NS=travel-portal
+        COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+      while [[ ${COUNT} != 2 ]]; do
+        sleep 5
+        echo "restarting deployment rollout for ${apps} in ${NS}"
+        echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
+        kubectl rollout restart deploy -l app=${apps} -n ${NS}
+        sleep 15
+        COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+        done
+        echo "done"
+    
+      echo "All Set, no restart required in ${NS}"
+    done
+---
+# Source: travel-portal/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: travelops-portal-role
+  namespace: travel-portal
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+---
+# Source: travel-portal/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: travelops-portal-rolebinding
+  namespace: travel-portal
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: travelops-portal-role
+subjects:
+- kind: ServiceAccount
+  name: travelops-sa
+  namespace: travel-portal
+---
+# Source: travel-portal/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: voyages
+  labels:
+    app: voyages
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: voyages
+---
+# Source: travel-portal/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: viaggi
+  labels:
+    app: viaggi
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: viaggi
+---
+# Source: travel-portal/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: travels
+  labels:
+    app: travels
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: travels
+---
+# Source: travel-portal/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: voyages-v1
+  namespace: travel-portal
+  labels:
+    app: voyages
+spec:
+  selector:
+    matchLabels:
+      app: voyages
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: voyages
+        version: v1
+    spec:
+      containers:
+        - name: voyages
+          image: quay.io/kiali/demo_travels_portal:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: PORTAL_COORDINATES
+              value: "48.861310,2.337418"
+            - name: PORTAL_COUNTRY
+              value: "France"
+            - name: PORTAL_NAME
+              value: "voyages.fr"
+            - name: TRAVELS_AGENCY_SERVICE
+              value: "http://travels.travel-agency:8000"
+---
+# Source: travel-portal/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: viaggi-v1
+  namespace: travel-portal
+  labels:
+    app: viaggi
+spec:
+  selector:
+    matchLabels:
+      app: viaggi
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: viaggi
+        version: v1
+    spec:
+      containers:
+        - name: control
+          image: quay.io/kiali/demo_travels_portal:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: PORTAL_COORDINATES
+              value: "41.890668,12.492194"
+            - name: PORTAL_COUNTRY
+              value: "Italy"
+            - name: PORTAL_NAME
+              value: "viaggi.it"
+            - name: TRAVELS_AGENCY_SERVICE
+              value: "http://travels.travel-agency:8000"
+---
+# Source: travel-portal/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travels-v1
+  namespace: travel-portal
+  labels:
+    app: travels
+spec:
+  selector:
+    matchLabels:
+      app: travels
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: travels
+        version: v1
+    spec:
+      containers:
+        - name: control
+          image: quay.io/kiali/demo_travels_portal:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: PORTAL_COORDINATES
+              value: "55.956245,-3.187915"
+            - name: PORTAL_COUNTRY
+              value: "United Kingdom"
+            - name: PORTAL_NAME
+              value: "travels.uk"
+            - name: TRAVELS_AGENCY_SERVICE
+              value: "http://travels.travel-agency:8000"
+---
+# Source: travel-portal/templates/job-restartDeployment.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: '50'
+  name: rollout-restart
+  namespace: travel-portal
+spec:
+  template:
+    spec:
+      containers:
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli
+        name: rollout-restart
+        command:
+          - /bin/bash
+          - '/usr/local/bin/rollout-restart.sh'
+        volumeMounts:
+        - mountPath: /usr/local/bin/rollout-restart.sh
+          name: rollout-restart
+          subPath: rollout-restart.sh
+      volumes:
+        - name: rollout-restart
+          configMap:
+            name: rollout-restart
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: travelops-sa
+      terminationGracePeriodSeconds: 400

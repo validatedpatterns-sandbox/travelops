@@ -1,0 +1,603 @@
+---
+# Source: travel-agency/templates/sa.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: travelops-sa
+  namespace: travel-agency
+---
+# Source: travel-agency/templates/cm-rollout-restart.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rollout-restart
+  namespace: travel-agency
+data:
+  rollout-restart.sh: |    
+    #!/bin/bash
+    
+    RUNNING=2
+    for apps in cars discounts flights insurances mysqldb travels hotels;  do
+        NS=travel-agency
+        COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+      while [[ ${COUNT} != 2 ]]; do
+        sleep 5
+        echo "restarting deployment rollout for ${apps} in ${NS}"
+        echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
+        kubectl rollout restart deploy -l app=${apps} -n ${NS}
+        sleep 15
+        COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
+        done
+        echo "done"
+    
+      echo "All Set, no restart required in ${NS}"
+    done
+---
+# Source: travel-agency/templates/role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: travelops-agency-role
+  namespace: travel-agency
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - replicasets
+  verbs:
+  - get
+  - list
+  - watch
+  - patch
+---
+# Source: travel-agency/templates/rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: travelops-agency-rolebinding
+  namespace: travel-agency
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: travelops-agency-role
+subjects:
+- kind: ServiceAccount
+  name: travelops-sa
+  namespace: travel-agency
+---
+# Source: travel-agency/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: cars
+  labels:
+    app: cars
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: cars
+---
+# Source: travel-agency/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: hotels
+  labels:
+    app: hotels
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: hotels
+---
+# Source: travel-agency/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: flights
+  labels:
+    app: flights
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: flights
+---
+# Source: travel-agency/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: insurances
+  labels:
+    app: insurances
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: insurances
+---
+# Source: travel-agency/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: discounts
+  labels:
+    app: discounts
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: discounts
+---
+# Source: travel-agency/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: travels
+  labels:
+    app: travels
+spec:
+  ports:
+    - name: http
+      port: 8000
+  selector:
+    app: travels
+---
+# Source: travel-agency/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cars-v1
+  labels:
+    app: cars
+spec:
+  selector:
+    matchLabels:
+      app: cars
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: cars
+        version: v1
+    spec:
+      containers:
+        - name: cars
+          image: quay.io/kiali/demo_travels_cars:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: CURRENT_SERVICE
+              value: cars
+            - name: CURRENT_VERSION
+              value: v1
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: DISCOUNTS_SERVICE
+              value: "http://discounts.travel-agency:8000"
+            - name: MYSQL_SERVICE
+              value: "mysqldb.travel-agency:3306"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: rootpasswd
+            - name: MYSQL_DATABASE
+              value: "test"
+---
+# Source: travel-agency/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hotels-v1
+  labels:
+    app: hotels
+spec:
+  selector:
+    matchLabels:
+      app: hotels
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: hotels
+        version: v1
+    spec:
+      containers:
+        - name: hotels
+          image: quay.io/kiali/demo_travels_hotels:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: CURRENT_SERVICE
+              value: hotels
+            - name: CURRENT_VERSION
+              value: v1
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: DISCOUNTS_SERVICE
+              value: "http://discounts.travel-agency:8000"
+            - name: MYSQL_SERVICE
+              value: "mysqldb.travel-agency:3306"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: rootpasswd
+            - name: MYSQL_DATABASE
+              value: "test"
+---
+# Source: travel-agency/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flights-v1
+  labels:
+    app: flights
+spec:
+  selector:
+    matchLabels:
+      app: flights
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: flights
+        version: v1
+    spec:
+      containers:
+        - name: flights
+          image: quay.io/kiali/demo_travels_flights:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: CURRENT_SERVICE
+              value: flights
+            - name: CURRENT_VERSION
+              value: v1
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: DISCOUNTS_SERVICE
+              value: "http://discounts.travel-agency:8000"
+            - name: MYSQL_SERVICE
+              value: "mysqldb.travel-agency:3306"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: rootpasswd
+            - name: MYSQL_DATABASE
+              value: "test"
+---
+# Source: travel-agency/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: insurances-v1
+  labels:
+    app: insurances
+spec:
+  selector:
+    matchLabels:
+      app: insurances
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+      labels:
+        app: insurances
+        version: v1
+    spec:
+      containers:
+        - name: insurances
+          image: quay.io/kiali/demo_travels_insurances:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: CURRENT_SERVICE
+              value: insurances
+            - name: CURRENT_VERSION
+              value: v1
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: DISCOUNTS_SERVICE
+              value: "http://discounts.travel-agency:8000"
+            - name: MYSQL_SERVICE
+              value: "mysqldb.travel-agency:3306"
+            - name: MYSQL_USER
+              value: "root"
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: rootpasswd
+            - name: MYSQL_DATABASE
+              value: "test"
+---
+# Source: travel-agency/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: discounts-v1
+  labels:
+    app: discounts
+spec:
+  selector:
+    matchLabels:
+      app: discounts
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: discounts
+        version: v1
+    spec:
+      containers:
+        - name: discounts
+          image: quay.io/kiali/demo_travels_discounts:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: CURRENT_SERVICE
+              value: discounts
+            - name: CURRENT_VERSION
+              value: v1
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+---
+# Source: travel-agency/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: travels-v1
+  labels:
+    app: travels
+spec:
+  selector:
+    matchLabels:
+      app: travels
+      version: v1
+  replicas: 1
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+        proxy.istio.io/config: |
+          tracing:
+            zipkin:
+              address: zipkin.istio-system:9411
+            sampling: 10
+            custom_tags:
+              http.header.portal:
+                header:
+                  name: portal
+              http.header.device:
+                header:
+                  name: device
+              http.header.user:
+                header:
+                  name: user
+              http.header.travel:
+                header:
+                  name: travel
+      labels:
+        app: travels
+        version: v1
+    spec:
+      containers:
+        - name: travels
+          image: quay.io/kiali/demo_travels_travels:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+          env:
+            - name: CURRENT_SERVICE
+              value: travels
+            - name: CURRENT_VERSION
+              value: v1
+            - name: LISTEN_ADDRESS
+              value: ":8000"
+            - name: FLIGHTS_SERVICE
+              value: "http://flights.travel-agency:8000"
+            - name: HOTELS_SERVICE
+              value: "http://hotels.travel-agency:8000"
+            - name: CARS_SERVICE
+              value: "http://cars.travel-agency:8000"
+            - name: INSURANCES_SERVICE
+              value: "http://insurances.travel-agency:8000"
+---
+# Source: travel-agency/templates/job-restartDeployment.yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+  name: rollout-restart
+  namespace: travel-agency
+spec:
+  template:
+    spec:
+      containers:
+      - image: image-registry.openshift-image-registry.svc:5000/openshift/cli
+        name: rollout-restart
+        command:
+          - /bin/bash
+          - '/usr/local/bin/rollout-restart.sh'
+        volumeMounts:
+        - mountPath: /usr/local/bin/rollout-restart.sh
+          name: rollout-restart
+          subPath: rollout-restart.sh
+      volumes:
+        - name: rollout-restart
+          configMap:
+            name: rollout-restart
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: travelops-sa
+      terminationGracePeriodSeconds: 400
