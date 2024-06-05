@@ -1,0 +1,78 @@
+---
+# Source: mysqldb/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mysqldb
+  name: mysqldb
+spec:
+  ports:
+  - name: tcp
+    port: 3306
+    protocol: TCP
+    targetPort: 3306
+  selector:
+    app: mysqldb
+---
+# Source: mysqldb/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysqldb-v1
+  labels:
+    version: v1
+    app: mysqldb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      version: v1
+      app: mysqldb
+  template:
+    metadata:
+      annotations:
+        readiness.status.sidecar.istio.io/applicationPorts: ""
+        sidecar.istio.io/inject: "true"
+        sidecar.jaegertracing.io/inject: "jaeger-production"
+      labels:
+        version: v1
+        app: mysqldb
+    spec:
+      containers:
+        - name: mysqldb
+          image: quay.io/kiali/demo_travels_mysqldb:v1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3306
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-credentials
+                  key: rootpasswd
+          args: ["--default-authentication-plugin","mysql_native_password"]
+          volumeMounts:
+            - name: var-lib-mysql
+              mountPath: /var/lib/mysql
+      volumes:
+        - name: var-lib-mysql
+          emptyDir:
+---
+# Source: mysqldb/templates/externalSecret.yaml
+apiVersion: "external-secrets.io/v1beta1"
+kind: ExternalSecret
+metadata:
+  name: mysqldb-credentials-external-secret
+spec:
+  refreshInterval: 15s
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: mysql-credentials
+    template:
+      type: Opaque
+  dataFrom:
+  - extract:
+      key: secret/data/global/mysql-credentials

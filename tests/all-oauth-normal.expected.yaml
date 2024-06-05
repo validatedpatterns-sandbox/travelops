@@ -1,0 +1,35 @@
+---
+# Source: oauth/templates/htpasswd-eso.yaml
+apiVersion: "external-secrets.io/v1beta1"
+kind: ExternalSecret
+metadata:
+  name: htpass-eso
+  namespace: openshift-config
+  annotations:
+    argocd.argoproj.io/compare-options: IgnoreExtraneous
+spec:
+  refreshInterval: 15s
+  secretStoreRef:
+    name: vault-backend
+    kind: ClusterSecretStore
+  target:
+    name: htpasswd
+  dataFrom:
+  - extract:
+      key: secret/data/global/htpasswd
+---
+# Source: oauth/templates/oauth.yaml
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+  annotations:
+    argocd.argoproj.io/sync-options: ServerSideApply=true
+spec:  
+  identityProviders:
+    - name: htpasswd
+      mappingMethod: claim
+      type: HTPasswd
+      htpasswd:
+        fileData:
+          name: htpasswd

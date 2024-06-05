@@ -1,6 +1,8 @@
 global:
   extraValueFiles: []
   pattern: common
+  secretStore:
+    backend: "vault"
   targetRevision: main
   options:
     useCSV: True
@@ -17,6 +19,11 @@ clusterGroup:
   isHubCluster: true
   targetCluster: in-cluster
   sharedValueFiles: []
+
+#  scheduler:
+#    mastersSchedulable: true
+#    defaultNodeSelector: type=user-node,region=east
+#    profile: HighNodeUtilization 
 
   argoCD:
     initContainers: []
@@ -49,6 +56,10 @@ clusterGroup:
     clusterRoleYaml: ""
     roleName: imperative-role
     roleYaml: ""
+    adminServiceAccountCreate: true
+    adminServiceAccountName: imperative-admin-sa
+    adminClusterRoleName: imperative-admin-cluster-role
+
   managedClusterGroups: {}
   namespaces: []
 #  - name: factory
