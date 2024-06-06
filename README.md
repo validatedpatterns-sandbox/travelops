@@ -15,3 +15,6 @@ for additional context and installation instructions
 1. Fork this repository and clone to your local machine
 1. Change directories into `travelops`
 1. Run `./patterns.sh make install` to install the pattern
+
+## Test Plan
+GOTO: [Test Plan](./TESTPLAN.md)
