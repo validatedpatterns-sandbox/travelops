@@ -21,8 +21,7 @@ clusterGroup:
     acm:
       name: advanced-cluster-management
       namespace: open-cluster-management
-      channel: release-2.9
-      #csv: advanced-cluster-management.v2.6.1
+      channel: release-2.11
 
     elasticsearch:
       name: elasticsearch-operator
@@ -72,7 +71,8 @@ clusterGroup:
       name: acm
       namespace: open-cluster-management
       project: hub
-      path: common/acm
+      chart: acm
+      chartVersion: 0.1.*
       ignoreDifferences:
       - group: internal.open-cluster-management.io
         kind: ManagedClusterInfo
@@ -83,13 +83,15 @@ clusterGroup:
       name: vault
       namespace: vault
       project: hub
-      path: common/hashicorp-vault
+      chart: hashicorp-vault
+      chartVersion: 0.1.*
 
     golang-external-secrets:
       name: golang-external-secrets
       namespace: golang-external-secrets
       project: hub
-      path: common/golang-external-secrets
+      chart: golang-external-secrets
+      chartVersion: 0.1.*
 
     mysql:
       name: mysqldb
@@ -131,7 +133,7 @@ clusterGroup:
     jobs:
     - name: hello-world
       # ansible playbook to be run
-      playbook: common/ansible/playbooks/hello-world/hello-world.yaml
+      playbook: rhvp.cluster_utils.hello_world
       # per playbook timeout in seconds
       timeout: 234
       # verbosity: "-v"
