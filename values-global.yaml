@@ -12,3 +12,7 @@ main:
   multiSourceConfig:
     enabled: true
     clusterGroupChartVersion: "0.9.*"
+  git:
+    repoUpstreamURL: https://github.com/validatedpatterns-sandbox/travelops
+    revision: rhdp-deploy
+
