@@ -1,0 +1,22 @@
+apiVersion: tempo.grafana.com/v1alpha1
+kind: TempoStack
+metadata:
+  name: {{ include "tempostack.fullname" . }}
+  namespace: {{ .Values.tempostack.namespace | default .Release.Namespace | quote }}
+spec:
+  storage:
+    secret:
+      name: {{ .Values.tempostack.storage.secretName }}
+      type: {{ .Values.tempostack.storage.type }}
+  storageSize: {{ .Values.tempostack.storage.size }}
+  resources:
+    total:
+      limits:
+        memory: {{ .Values.tempostack.resources.limits.memory }}
+        cpu: {{ .Values.tempostack.resources.limits.cpu | quote }}
+  tenants:
+    mode: {{ .Values.tempostack.tenants.mode }}
+    authentication:
+{{ toYaml .Values.tempostack.tenants.authentication | indent 6 }}
+  template:
+{{ toYaml .Values.tempostack.template | indent 4 }}

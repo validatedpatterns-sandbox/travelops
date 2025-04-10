@@ -1,99 +1,64 @@
-# Default values for controlplane.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
-#
-# START of Global Value declaration
-global:
-  localClusterDomain: ''
+servicemesh:
+  version: v1.24.3
+  profile: "" # Always applies default and openshift profiles, even when not set. If set, must be one of: ambient, default, demo, empty, openshift-ambient, openshift, preview, remote, stable.
 
-  jaeger:
-    strategy: production
+  istio:
+    name: default
+    updateStrategy: {}
+      # type: InPlace
+      # inactiveRevisionDeletionGracePeriodSeconds: 30
+      # updateWorkloads: false
+    values: {}
+      # meshConfig:
+      #   enableTracing: true
+      #   extensionProviders:
+      #   - name: otel
+      #     opentelemetry:
+      #       port: 4317
+      #       service: dev-collector.tempo.svc.cluster.local
 
-# END of Global Values
+  istiocni:
+    name: default
+    values: {}
+      # cni:
+      #   provider: multus
 
-# Configure servicemesh controlplane version and profile to use
-smcp:
-  version: v2.4
-  profiles: default
+  ztunnel:
+    enabled: false # Ztunnel is only used in ambient mode
+    name: default
+    values: {}
+      # ztunnel:
+      #   logAsJson: true
 
-# Define the namespaces that belong in the service mesh
-# Use this when defining memberRoll outside of demo applications
-mesh:
-  members: {}
+  peerauthentications: []
+    # - name: default
+    #   namespace: istio-system
+    #   spec:
+    #     mtls:
+    #       mode: STRICT
 
-# Enable or disable mtls and automtls. BOTH ARE DEFAULT ENABLED
-security:
-  dataPlane:
-    automtls: ''
-    mtls: ''
-
-# Configure proxy resources requests and limits
-proxy:
- requests:
-   cpu: 100m
-   memory: 128Mi
- limits:
-   cpu: 500m
-   memory: 128Mi
-
-# Configure ingress/egress gateways 
-gateways:
-  enabled: true
-  egress:
+  monitoring:
     enabled: true
-    autoscaling:
-      enabled: true
-      minReplicas: 2
-      maxReplicas: 2
-  ingress:
-    enabled: true
-    autoscaling:
-      enabled: true
-      minReplicas: 2
-      maxReplicas: 2
-  openshiftRoute:
-    enabled: false
 
-# Configure Grafana addon resources
-grafana:
-  enabled: true
-  persistence:
-    enabled: true
-    storageClassName: ""
-    accessMode: ReadWriteOnce
-    capacity:
-      requests:
-        storage: 5Gi
-  service:
-    ingress:
-      contextPath: /grafana
-      tls:
-        termination: reencrypt
-      
-# Define runtime resources
-pilot:
-  deployment:
-    replicas: 2
+    podMonitorNamespaces: []
+      # - istio-system
 
-# Default sampling size for Jaeger is 100% (10000) 
-# jaeger sampling of 20% of all traffic is defined as 2000
-jaeger:
-  storage: Elasticsearch
-  tracing:
-    sampling: 10000
-    type: Jaeger
-
-elasticsearch:
-  indexCleaner:
+  console:
     enabled: true
-    days: 7
-    schedule: '55 23 * * *'
-  nodeCount: 1
-  storage:
-    size: 1Gi
-  requests:
-    cpu: 200m
-    memory: 2Gi
-  limits:
-    memory: 2Gi
-  redundancyPolicy: ZeroRedundancy
+
+  kiali:
+    name: default
+    spec: # See https://kiali.io/docs/configuration/kialis.kiali.io/ for CRD schema
+      external_services:
+        prometheus:
+          auth:
+            type: bearer
+            use_kiali_token: true
+          thanos_proxy:
+            enabled: true
+          url: https://thanos-querier.openshift-monitoring.svc.cluster.local:9091
+
+  ossmc:
+    name: ossmconsole
+    spec: # See https://kiali.io/docs/configuration/ossmconsoles.kiali.io/ for CRD schema
+      version: default

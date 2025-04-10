@@ -1,0 +1,119 @@
+{{- if .Values.tempostack.minio.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ printf "%s-pv-claim" (include "tempostack.fullname" .) }}
+  namespace: {{ .Values.tempostack.namespace | default .Release.Namespace | quote }}
+  labels:
+    app: {{ printf "%s-storage-claim" (include "tempostack.fullname" .) }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.tempostack.storage.size }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tempostack.fullname" . }}
+  namespace: {{ .Values.tempostack.namespace | default .Release.Namespace | quote }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ include "tempostack.fullname" . }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ include "tempostack.fullname" . }}
+    spec:
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: {{ printf "%s-pv-claim" (include "tempostack.fullname" .) }}
+      initContainers:
+        - name: create-buckets
+          image: busybox:1.28
+          command:
+            - "sh"
+            - "-c"
+            - {{ printf "mkdir -p /storage/%s" .Values.tempostack.minio.bucket | quote }}
+          volumeMounts:
+            - name: storage
+              mountPath: "/storage"
+      containers:
+        - name: minio
+          image: minio/minio:latest
+          args:
+            - server
+            - /storage
+            - --console-address
+            - ":9001"
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tempostack.storage.secretName }}
+                  key: access_key_id
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.tempostack.storage.secretName }}
+                  key: access_key_secret
+          ports:
+            - containerPort: 9000
+            - containerPort: 9001
+          volumeMounts:
+            - name: storage
+              mountPath: "/storage"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tempostack.fullname" . }}
+  namespace: {{ .Values.tempostack.namespace | default .Release.Namespace | quote }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9000
+      targetPort: 9000
+      protocol: TCP
+      name: api
+    - port: 9001
+      targetPort: 9001
+      protocol: TCP
+      name: console
+  selector:
+    app: {{ include "tempostack.fullname" . }}
+---
+apiVersion: external-secrets.io/v1beta1
+kind: ExternalSecret
+metadata:
+  name: {{ .Values.tempostack.storage.secretName }}
+  namespace: {{ .Values.tempostack.namespace | default .Release.Namespace | quote }}
+spec:
+  refreshInterval: 15s
+  secretStoreRef:
+    name: {{ .Values.secretStore.name }}
+    kind: {{ .Values.secretStore.kind }}
+  target:
+    name: {{ .Values.tempostack.storage.secretName }}
+    template:
+      type: Opaque
+      data:
+        bucket: {{ .Values.tempostack.minio.bucket | quote }}
+        endpoint: {{ printf "http://%s:9000" (include "tempostack.fullname" .) }}
+        access_key_id: "{{ `{{ .access_key_id }}` }}"
+        access_key_secret: "{{ `{{ .access_key_secret }}` }}"
+  data:
+    - secretKey: access_key_id
+      remoteRef:
+        key: {{ .Values.secretStore.remoteKey }}
+        property: accessKey
+    - secretKey: access_key_secret
+      remoteRef:
+        key: {{ .Values.secretStore.remoteKey }}
+        property: secretKey
+{{- end }}

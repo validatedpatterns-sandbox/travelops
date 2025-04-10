@@ -1,194 +1,244 @@
 clusterGroup:
   name: prod
-  isHubCluster: false
 
   namespaces:
     - vault
     - golang-external-secrets
-    - openshift-operators-redhat:
+    - travel-agency:
+        labels:
+          istio-discovery: enabled
+          istio.io/rev: default
+    - travel-portal:
+        labels:
+          istio-discovery: enabled
+          istio.io/rev: default
+    - travel-control:
+        labels:
+          istio-discovery: enabled
+          istio.io/rev: default
+    - istio-system:
+        labels:
+          istio-discovery: enabled
+    - tempo:
+        labels:
+          istio-discovery: enabled
+    - openshift-tempo-operator:
+        labels:
+          openshift.io/cluster-monitoring: true
         operatorGroup: true
         targetNamespaces:
-    - openshift-distributed-tracing:
+    - openshift-opentelemetry-operator:
         operatorGroup: true
         targetNamespaces:
-    - prod-istio-system
-    - prod-travel-agency
-    - prod-travel-portal
-    - prod-travel-control
+    - openshift-cluster-observability-operator:
+        labels:
+          openshift.io/cluster-monitoring: true
+        operatorGroup: true
+        targetNamespaces:
 
   subscriptions:
-    elasticsearch:
-      name: elasticsearch-operator
-      namespace: openshift-operators-redhat
-    
-    jaeger:
-      name: jaeger-product
-      namespace: openshift-distributed-tracing
-    
-    kiali:
-      name: kiali-ossm
-      namespace: openshift-operators
-    
     servicemesh:
-      name: servicemeshoperator
-      namespace: openshift-operators
-  
+      name: servicemeshoperator3
+
+    servicemesh-console:
+      name: kiali-ossm
+
+    distributed-tracing:
+      name: tempo-product
+      namespace: openshift-tempo-operator
+
+    opentelemetry:
+      name: opentelemetry-product
+      namespace: openshift-opentelemetry-operator
+
+    cluster-observability:
+      name: cluster-observability-operator
+      namespace: openshift-cluster-observability-operator
+
   projects:
-    - eso
+    - hub
     - servicemesh
-    - travelops-prod
-
-  # Explicitly mention the cluster-state based overrides we plan to use for this pattern.
-  # We can use self-referential variables because the chart calls the tpl function with these variables defined
-  sharedValueFiles:
-    - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-
-  # sharedValueFiles is a flexible mechanism that will add the listed valuefiles to every app defined in the
-  # applications section. We intend this to supplement and possibly even replace previous "magic" mechanisms, though
-  # we do not at present have a target date for removal.
-  #
-  # To replicate the "classic" magic include structure, the clusterGroup would need all of these
-  # sharedValueFiles, in this order:
-  #   - '/overrides/values-{{ $.Values.global.clusterPlatform }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.global.clusterVersion }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.clusterPlatform }}-{{ $.Values.clusterGroup.name }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.clusterVersion }}-{{ $.Values.clusterGroup.name }}.yaml"
-  #   - '/overrides/values-{{ $.Values.global.localClusterName }}.yaml'
-
-  # This kind of variable substitution will work with any of the variables the Validated Patterns operator knows
-  # about and sets, so this is also possible, for example:
-  #   - '/overrides/values-{{ $.Values.global.hubClusterDomain }}.yaml'
-  #   - '/overrides/values-{{ $.Values.global.localClusterDomain }}.yaml'
+    - travelops
+    - distributed-tracing
 
   applications:
+    vault:
+      name: vault
+      namespace: vault
+      project: hub
+      chart: hashicorp-vault
+      chartVersion: 0.1.*
+
     golang-external-secrets:
       name: golang-external-secrets
       namespace: golang-external-secrets
-      project: eso
-      path: common/golang-external-secrets
+      project: hub
+      chart: golang-external-secrets
+      chartVersion: 0.1.*
 
     mysql:
-      name: mysql
-      namespace: prod-travel-agency
-      project: travelops-prod
-      path: charts/mysqldb
+      name: mysqldb
+      namespace: travel-agency
+      project: travelops
+      path: charts/all/travelops/mysqldb
+
+    agency:
+      name: travel-agency
+      namespace: travel-agency
+      project: travelops
+      path: charts/all/travelops/travel-agency
+
+    portal:
+      name: travel-portal
+      namespace: travel-portal
+      project: travelops
+      path: charts/all/travelops/travel-portal
+
+    control:
+      name: travel-control
+      namespace: travel-control
+      project: travelops
+      path: charts/all/travelops/travel-control
 
     servicemesh:
-      name: servicemesh-controlplane
-      namespace: prod-istio-system
+      name: servicemesh
+      namespace: istio-system
       project: servicemesh
-      path: charts/servicemesh
+      path: charts/all/servicemesh
 
-    services:
-      name: travelops-services
-      namespace: prod-travel-agency
-      project: travelops-prod
-      path: charts/travelops/services
-    
-    portal:
-      name: travelops-portal
-      namespace: prod-travel-portal
-      project: travelops-prod
-      path: charts/travelops/portal
+    temposttack:
+      name: tempostack
+      namespace: tempo
+      project: distributed-tracing
+      path: charts/all/tempostack
 
-  imperative:
-    # NOTE: We *must* use lists and not hashes. As hashes lose ordering once parsed by helm
-    # The default schedule is every 10 minutes: imperative.schedule
-    # Total timeout of all jobs is 1h: imperative.activeDeadlineSeconds
-    # imagePullPolicy is set to always: imperative.imagePullPolicy
-    # For additional overrides that apply to the jobs, please refer to
-    # https://hybrid-cloud-patterns.io/imperative-actions/#additional-job-customizations
-    jobs:
-    - name: hello-world
-      # ansible playbook to be run
-      playbook: common/ansible/playbooks/hello-world/hello-world.yaml
-      # per playbook timeout in seconds
-      timeout: 234
-      # verbosity: "-v"
+    tracing:
+      name: distributed-tracing
+      namespace: istio-system
+      project: distributed-tracing
+      path: charts/all/distributed-tracing
 
-  managedClusterGroups:
-    exampleRegion:
-      name: group-one
-      acmlabels:
-      - name: clusterGroup
-        value: group-one
-      helmOverrides:
-      - name: clusterGroup.isHubCluster
-        value: false
+servicemesh:
+  istio:
+    values:
+      meshConfig:
+        enableTracing: true
+        extensionProviders:
+          - name: zipkin
+            zipkin:
+              service: dev-collector.istio-system.svc.cluster.local
+              port: 9411
+        defaultProviders:
+          tracing:
+            - zipkin
+        discoverySelectors:
+          - matchLabels:
+              istio-discovery: enabled
 
-      # Before enabling cluster provisioning, ensure AWS and/or Azure
-      #   credentials and OCP pull secrets are defined in Vault.
-      #   See values-secret.yaml.template
-      #
-      #clusterPools:
-      #  exampleAWSPool:
-      #    name: aws-ap
-      #    openshiftVersion: 4.10.18
-      #    baseDomain: blueprints.rhecoeng.com
-      #    platform:
-      #      aws:
-      #        region: ap-southeast-2
-      #    clusters:
-      #    - One
-      #
-      #  exampleAzurePool:
-      #    name: azure-us
-      #    openshiftVersion: 4.10.18
-      #    baseDomain: blueprints.rhecoeng.com
-      #    platform:
-      #      azure:
-      #        baseDomainResourceGroupName: dojo-dns-zones
-      #        region: eastus
-      #    clusters:
-      #    - Two
-      #    - Three
+  peerauthentications:
+    - name: default
+      namespace: istio-system
+      spec:
+        mtls:
+          mode: STRICT
 
-#  To have apps in multiple flavors, use namespaces and use helm overrides as appropriate
-#
-#    pipelines:
-#      name: pipelines
-#      namespace: production
-#      project: datacenter
-#      path: applications/pipeline
-#      repoURL: https://github.com/you/applications.git
-#      targetRevision: stable
-#      overrides:
-#      - name: myparam
-#        value: myparam
-#
-#    pipelines_staging:
-#    - name: pipelines
-#      namespace: staging
-#      project: datacenter
-#      path: applications/pipeline
-#      repoURL: https://github.com/you/applications.git
-#      targetRevision: main
-#
-#   Additional applications
-#   Be sure to include additional resources your apps will require
-#   +X machines
-#   +Y RAM
-#   +Z CPU
-#    vendor-app:
-#      name: vendor-app
-#      namespace: default
-#      project: vendor
-#      path: path/to/myapp
-#      repoURL: https://github.com/vendor/applications.git
-#      targetRevision: main
+  monitoring:
+    enabled: true
+    podMonitorNamespaces:
+      - travel-agency
+      - travel-portal
+      - travel-control
 
-#  managedSites:
-#    factory:
-#      name: factory
-#      # repoURL: https://github.com/dagger-refuse-cool/manuela-factory.git
-#      targetRevision: main
-#      path: applications/factory
-#      helmOverrides:
-#      - name: site.isHubCluster
-#        value: false
-#      clusterSelector:
-#        matchExpressions:
-#        - key: vendor
-#          operator: In
-#          values:
-#            - OpenShift
+tempostack:
+  namespace: tempo
+
+  storage:
+    secretName: tempostack-dev-minio
+
+  resources:
+    limits:
+      memory: 16Gi
+      cpu: "6"
+
+  tenants:
+    authentication:
+      - tenantName: dev
+        tenantId: ec68da6d-6e32-410d-9f76-07d815ab865a
+
+  template:
+    gateway:
+      enabled: true
+    queryFrontend:
+      jaegerQuery:
+        enabled: true
+
+  rbac:
+    reader:
+      resourceNames:
+        - traces
+
+tracing:
+  telemetries:
+    - name: mesh-default
+      namespace: istio-system
+      spec:
+        tracing:
+          - providers:
+              - name: zipkin
+            randomSamplingPercentage: 100
+        metrics:
+          - providers:
+              - name: prometheus
+
+  collectors:
+    - name: dev
+      namespace: istio-system
+      config: |
+        receivers:
+          jaeger:
+            protocols:
+              grpc:
+                endpoint: 0.0.0.0:14250
+              thrift_binary:
+                endpoint: 0.0.0.0:6832
+              thrift_compact:
+                endpoint: 0.0.0.0:6831
+              thrift_http:
+                endpoint: 0.0.0.0:14268
+          otlp:
+            protocols:
+              grpc:
+                endpoint: 0.0.0.0:4317
+              http:
+                endpoint: 0.0.0.0:4318
+          zipkin:
+            endpoint: 0.0.0.0:9411
+        exporters:
+          debug: null
+          otlp:
+            auth:
+              authenticator: bearertokenauth
+            endpoint: tempo-tempostack-gateway.tempo.svc.cluster.local:8090
+            headers:
+              X-Scope-OrgID: dev
+            tls:
+              ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+              insecure: false
+        extensions:
+          bearertokenauth:
+            filename: /var/run/secrets/kubernetes.io/serviceaccount/token
+        service:
+          extensions:
+            - bearertokenauth
+          telemetry:
+            metrics:
+              address: 0.0.0.0:8888
+          pipelines:
+            traces:
+              exporters:
+                - otlp
+                - debug
+              receivers:
+                - otlp
+                - jaeger
+                - zipkin

@@ -1,0 +1,10 @@
+{{- range .Values.tracing.telemetries }}
+apiVersion: telemetry.istio.io/v1
+kind: Telemetry
+metadata:
+  name: {{ .name }}
+  namespace: {{ .namespace }}
+spec:
+{{ toYaml .spec | indent 2 }}
+---
+{{- end }}
