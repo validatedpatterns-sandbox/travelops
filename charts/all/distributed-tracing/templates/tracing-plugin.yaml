@@ -1,0 +1,8 @@
+{{- if .Values.tracing.plugin.enabled }}
+apiVersion: observability.openshift.io/v1alpha1
+kind: UIPlugin
+metadata:
+  name: {{ include "distributed-tracing.fullname" . }}
+spec:
+  type: DistributedTracing
+{{- end }}

@@ -43,15 +43,15 @@ Selector labels
 {{- define "travel-agency.selectorLabels" -}}
 {{- end }}
 
-{{/* 
+{{/*
 Proxy config for istio (indent 8)
 */}}
 {{- define "travel-agency.istioProxyConfig" -}}
 proxy.istio.io/config: |
   tracing:
     zipkin:
-      address: zipkin.istio-system:9411
-    sampling: 10
+      address: dev-collector.istio-system.svc.cluster.local:9411
+    sampling: 100
     custom_tags:
       http.header.portal:
         header:

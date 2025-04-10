@@ -61,23 +61,44 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+{{/*
+Proxy config for istio (indent 8)
+*/}}
+{{- define "travel-control.istioProxyConfig" -}}
+proxy.istio.io/config: |
+  tracing:
+    zipkin:
+      address: dev-collector.istio-system.svc.cluster.local:9411
+    sampling: 100
+    custom_tags:
+      http.header.portal:
+        header:
+          name: portal
+      http.header.device:
+        header:
+          name: device
+      http.header.user:
+        header:
+          name: user
+      http.header.travel:
+        header:
+          name: travel
+{{- end }}
+
 {{- define "travel-control.rolloutRestart" }}
 #!/bin/bash
 
-RUNNING=2
-for apps in control;  do
-    NS=travel-control
-    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
-  while [[ ${COUNT} != 2 ]]; do
-    sleep 5
-    echo "restarting deployment rollout for ${apps} in ${NS}"
-    echo "Running: kubectl rollout restart deploy -l app=${apps} -n ${NS}"
-    kubectl rollout restart deploy -l app=${apps} -n ${NS}
-    sleep 5
-    COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '{print $2}' | awk -F/ '{print $1}')
-    done
-    echo "done"
+for apps in control; do
+  NS=travel-control
+  READY_COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '$2 == "2/2"' | wc -l)
 
-  echo "All Set, no restart required in ${NS}"
+  while [[ ${READY_COUNT} -lt 1 ]]; do
+    echo "🔄 Restarting deployment rollout for ${apps} in ${NS}"
+    kubectl rollout restart deploy -l app=${apps} -n ${NS}
+    sleep 10
+    READY_COUNT=$(oc get pods -l app=${apps} --no-headers -n ${NS} | awk '$2 == "2/2"' | wc -l)
+  done
+
+  echo "✅ ${apps} in ${NS} is fully rolled out with sidecars."
 done
 {{- end }}

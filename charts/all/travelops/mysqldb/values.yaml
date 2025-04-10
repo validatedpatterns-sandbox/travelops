@@ -2,17 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Global parameters for the jaeger resource
-global:
-  jaeger:
-    strategy: production
-
-# Enable Auto sidecar injection for travel apps
-sidecarAutoInjection: true
-
-# Enable jaeger sidecar
-sidecarJaeger: true
-
 replicaCount: 1
 
 image:
@@ -32,7 +21,7 @@ service:
   type: ClusterIP
   protocol: TCP
   port: 3306
-  targetPort: 
+  targetPort:
 
 # External Secrets Operator config
 secretStore:
