@@ -1,5 +1,6 @@
 clusterGroup:
   name: prod
+  isHubCluster: true
 
   namespaces:
     - vault

@@ -22,4 +22,4 @@ post-install: ## Post-install tasks
 
 .PHONY: test
 test:
-	@make -f common/Makefile PATTERN_OPTS="-f values-global.yaml -f values-hub.yaml" test
+	@make -f common/Makefile PATTERN_OPTS="-f values-global.yaml -f values-prod.yaml" test
