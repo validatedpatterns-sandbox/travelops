@@ -9,10 +9,6 @@ config: |
           endpoint: 0.0.0.0:4318
     zipkin:
       endpoint: 0.0.0.0:9411
-  processors:
-    batch:
-      send_batch_size: 1024
-      timeout: 1s
   extensions:
     bearertokenauth:
       filename: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -28,6 +24,10 @@ config: |
       tls:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
         insecure: false
+  processors:
+    batch:
+      send_batch_size: 1024
+      timeout: 1s
   service:
     extensions:
       - bearertokenauth
