@@ -11,8 +11,8 @@ config: |
       endpoint: 0.0.0.0:9411
   processors:
     batch:
-      timeout: 1s
       send_batch_size: 1024
+      timeout: 1s
   extensions:
     bearertokenauth:
       filename: /var/run/secrets/kubernetes.io/serviceaccount/token
@@ -29,7 +29,8 @@ config: |
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
         insecure: false
   service:
-    extensions: [bearertokenauth]
+    extensions:
+      - bearertokenauth
     telemetry:
       metrics:
         level: detailed
@@ -37,7 +38,7 @@ config: |
           - pull:
               exporter:
                 prometheus:
-                  host: "0.0.0.0"
+                  host: 0.0.0.0
                   port: 8888
     pipelines:
       traces:
