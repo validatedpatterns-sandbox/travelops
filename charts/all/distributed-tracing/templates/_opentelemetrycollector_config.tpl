@@ -9,9 +9,6 @@ config: |
           endpoint: 0.0.0.0:4318
     zipkin:
       endpoint: 0.0.0.0:9411
-  extensions:
-    bearertokenauth:
-      filename: /var/run/secrets/kubernetes.io/serviceaccount/token
   exporters:
     debug:
       verbosity: basic
@@ -28,6 +25,9 @@ config: |
     batch:
       send_batch_size: 1024
       timeout: 1s
+  extensions:
+    bearertokenauth:
+      filename: /var/run/secrets/kubernetes.io/serviceaccount/token
   service:
     extensions:
       - bearertokenauth
