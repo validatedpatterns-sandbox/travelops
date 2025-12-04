@@ -46,6 +46,5 @@ config: |
           - debug
         receivers:
           - otlp
-          - jaeger
           - zipkin
 {{- end }}
