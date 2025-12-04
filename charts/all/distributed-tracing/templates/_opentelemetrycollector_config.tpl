@@ -1,5 +1,5 @@
 {{- define "otc.config" -}}
-config:
+config: |
   receivers:
     otlp:
       protocols:
@@ -32,12 +32,13 @@ config:
     extensions: [bearertokenauth]
     telemetry:
       metrics:
+        level: detailed
         readers:
-        - pull:
-            exporter:
-              prometheus:
-                host: 0.0.0.0
-                port: 8888
+          - pull:
+              exporter:
+                prometheus:
+                  host: "0.0.0.0"
+                  port: 8888
     pipelines:
       traces:
         exporters:
