@@ -1,11 +1,7 @@
-{{- range .Values.tracing.collectors }}
 apiVersion: opentelemetry.io/v1alpha1
 kind: OpenTelemetryCollector
 metadata:
-  name: {{ .name }}
-  namespace: {{ .namespace }}
+  name: dev
+  namespace: istio-system
 spec:
-  config: |
-{{ .config | indent 4 }}
----
-{{- end }}
+{{- include "otc.config" . | nindent 2 }}
