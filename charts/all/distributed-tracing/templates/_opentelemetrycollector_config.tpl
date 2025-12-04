@@ -1,16 +1,6 @@
 {{- define "otc.config" -}}
 config:
   receivers:
-    jaeger:
-      protocols:
-        grpc:
-          endpoint: 0.0.0.0:14250
-        thrift_binary:
-          endpoint: 0.0.0.0:6832
-        thrift_compact:
-          endpoint: 0.0.0.0:6831
-        thrift_http:
-          endpoint: 0.0.0.0:14268
     otlp:
       protocols:
         grpc:
@@ -19,8 +9,16 @@ config:
           endpoint: 0.0.0.0:4318
     zipkin:
       endpoint: 0.0.0.0:9411
+  processors:
+    batch:
+      timeout: 1s
+      send_batch_size: 1024
+  extensions:
+    bearertokenauth:
+      filename: /var/run/secrets/kubernetes.io/serviceaccount/token
   exporters:
-    debug: null
+    debug:
+      verbosity: basic
     otlp:
       auth:
         authenticator: bearertokenauth
@@ -30,12 +28,8 @@ config:
       tls:
         ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
         insecure: false
-  extensions:
-    bearertokenauth:
-      filename: /var/run/secrets/kubernetes.io/serviceaccount/token
   service:
-    extensions:
-      - bearertokenauth
+    extensions: [bearertokenauth]
     telemetry:
       metrics:
         readers:
