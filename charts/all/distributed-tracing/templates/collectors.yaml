@@ -4,4 +4,4 @@ metadata:
   name: dev
   namespace: istio-system
 spec:
-{{- include "otc.config" . | nindent 4 }}
+{{- include "otc.config" . | nindent 2 }}
