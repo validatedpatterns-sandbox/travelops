@@ -1,0 +1,9 @@
+apiVersion: v2
+name: tempostack
+description: |
+  Deploys a multi-tenant TempoStack instance, optionally bundled with a MinIO backend.
+  Ideal as a tracing backend with Red Hat Service Mesh 3 and Tempo.
+
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

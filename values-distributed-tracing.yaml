@@ -1,0 +1,40 @@
+tempostack:
+  namespace: tempo
+
+  storage:
+    secretName: tempostack-dev-minio
+
+  resources:
+    limits:
+      memory: 16Gi
+      cpu: "6"
+
+  tenants:
+    authentication:
+      - tenantName: dev
+        tenantId: ec68da6d-6e32-410d-9f76-07d815ab865a
+
+  template:
+    gateway:
+      enabled: true
+    queryFrontend:
+      jaegerQuery:
+        enabled: true
+
+  rbac:
+    reader:
+      resourceNames:
+        - traces
+
+tracing:
+  telemetries:
+    - name: mesh-default
+      namespace: istio-system
+      spec:
+        tracing:
+          - providers:
+              - name: zipkin
+            randomSamplingPercentage: 100
+        metrics:
+          - providers:
+              - name: prometheus

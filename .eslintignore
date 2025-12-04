@@ -1,0 +1,3 @@
+# Ignore specific Playwright config and test files due to tsconfig parsing issues on our superlinter
+tests/interop/ui/playwright.config.ts
+tests/interop/ui/travelops.spec.ts

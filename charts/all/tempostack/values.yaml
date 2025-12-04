@@ -1,0 +1,35 @@
+tempostack:
+  storage:
+    type: s3
+    secretName: tempostack-default-secret
+    size: 10Gi
+
+  resources: # Resources are autonomously split between all deployments in the tempostack. Override resources per-deployment in the tempate value.
+    limits:
+      memory: 6Gi
+      cpu: "2"
+
+  tenants:
+    mode: openshift
+    authentication:
+      - tenantName: default
+        tenantId: "1610b0c3-c509-4592-a256-a1871353dbfa" # must be unique over the ENTIRE lifetime of the tempo operator deployment
+
+  template: {}
+    # gateway:
+    #   enabled: true
+
+  rbac:
+    enabled: true
+    reader:
+      resourceNames: []
+        # - traces
+
+  minio:
+    enabled: true
+    bucket: tempo-data
+
+secretStore:
+  name: vault-backend
+  kind: ClusterSecretStore
+  remoteKey: secret/data/global/minio-credentials

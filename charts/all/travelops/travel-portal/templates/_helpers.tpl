@@ -61,12 +61,15 @@ Create the name of the service account to use
 {{- end }}
 {{- end }}
 
+{{/*
+Proxy config for istio (indent 8)
+*/}}
 {{- define "travel-portal.istioProxyConfig" -}}
 proxy.istio.io/config: |
   tracing:
     zipkin:
-      address: zipkin.istio-system:9411
-    sampling: 10
+      address: dev-collector.istio-system.svc.cluster.local:9411
+    sampling: 100
     custom_tags:
       http.header.portal:
         header:
@@ -80,7 +83,7 @@ proxy.istio.io/config: |
       http.header.travel:
         header:
           name: travel
-{{- end}}
+{{- end }}
 
 {{- define "travel-portal.rolloutRestart" }}
 #!/bin/bash
