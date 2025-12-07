@@ -1,0 +1,23 @@
+{{- if .Values.gateway.enabled }}
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: travel-control-gateway
+  namespace: {{ .Values.gateway.namespace | default "travel-control" }}
+  labels:
+    {{- include "travel-control.labels" . | nindent 4 }}
+spec:
+  gatewayClassName: {{ .Values.gateway.gatewayClassName }}
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: {{ .Values.gateway.port | default 80 }}
+      {{- if .Values.gateway.hostname }}
+      hostname: {{ .Values.gateway.hostname }}
+      {{- end }}
+      allowedRoutes:
+        namespaces:
+          from: {{ .Values.gateway.allowedRoutes.from | default "Same" }}
+{{- end }}
+

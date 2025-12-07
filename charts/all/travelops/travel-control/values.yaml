@@ -23,3 +23,13 @@ job:
 
 rbac:
   serviceAccountName: travelops-sa
+
+gateway:
+  enabled: true
+  namespace: travel-control
+  gatewayClassName: istio
+  port: 80
+  hostname: ""
+  path: "/"
+  allowedRoutes:
+    from: Same
