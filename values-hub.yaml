@@ -5,7 +5,7 @@ clusterGroup:
   namespaces:
     - vault
     - golang-external-secrets
-    - external-dns-operator
+    #- external-dns-operator
     - travel-agency:
         labels:
           istio-discovery: enabled
@@ -55,9 +55,9 @@ clusterGroup:
     cluster-observability:
       name: cluster-observability-operator
       namespace: openshift-cluster-observability-operator
-    external-dns-operator:
-      name: external-dns-operator
-      channel: stable-v1
+    #external-dns-operator:
+    #  name: external-dns-operator
+    #  channel: stable-v1
 
   projects:
     - hub
