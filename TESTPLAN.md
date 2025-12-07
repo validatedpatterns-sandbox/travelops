@@ -24,7 +24,7 @@ cp values-secret.yaml.template $HOME/values-secret-travelops.yaml
 1. Get the route to the travel control portal
 
 ```shell
-CONTROL=http://$(oc get route istio-ingressgateway -n istio-system -o jsonpath='{.spec.host}')
+CONTROL=http://$(oc get gtw travel-control-gateway -o jsonpath='{.status.addresses[0].value}')
 ```
 
 In the travel control dashboard, use the sliders to change the requests for each travel locale. We need this to generate traffic

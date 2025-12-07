@@ -17,6 +17,9 @@ clusterGroup:
         labels:
           istio-discovery: enabled
           istio.io/rev: default
+    - istio-cni:
+        labels:
+          istio-discovery: enabled
     - istio-system:
         labels:
           istio-discovery: enabled
@@ -128,6 +131,9 @@ servicemesh:
         discoverySelectors:
           - matchLabels:
               istio-discovery: enabled
+  istiocni:
+    name: default
+    namespace: istio-cni
   peerauthentications:
     - name: default
       namespace: istio-system
