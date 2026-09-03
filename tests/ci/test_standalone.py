@@ -10,6 +10,9 @@ from validatedpatterns_tests.interop import components, subscription
 def test_subscription_status_standalone(openshift_dyn_client):
     expected_subs = {
         "openshift-gitops-operator": ["openshift-gitops-operator"],
+        "tempo-product": ["openshift-tempo-operator"],
+        "cluster-observability-operator": ["openshift-cluster-observability-operator"],
+        "opentelemetry-product": ["openshift-opentelemetry-operator"],
     }
 
     subscription.assert_subscription_status(openshift_dyn_client, expected_subs)
@@ -43,9 +46,12 @@ def test_pod_status_standalone(openshift_dyn_client):
         "patterns-operator",
         "vp-gitops",
         "vault",
-        "hello-world",
-        "config-demo",
-        "external-secrets",
-        # "non-existing"
+        "golang-external-secrets",
+        "travel-agency",
+        "travel-control",
+        "travel-portal",
+        "openshift-tempo-operator",
+        "openshift-opentelemetry-operator",
+        "openshift-cluster-observability-operator",
     ]
     components.assert_pod_status(openshift_dyn_client, projects, skip_check=[])
