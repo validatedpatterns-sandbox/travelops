@@ -2,6 +2,8 @@
 global:
   pattern: travelops
 
+  singleArgoCD: true
+
   options:
     useCSV: false
     syncPolicy: Automatic
