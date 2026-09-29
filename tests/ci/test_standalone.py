@@ -1,6 +1,8 @@
 import pytest
 from validatedpatterns_tests.interop import components, subscription
 
+from .helpers import assert_url_reachable, gateway_url, route_url
+
 
 @pytest.mark.parametrize(
     "openshift_dyn_client",
@@ -55,3 +57,35 @@ def test_pod_status_standalone(openshift_dyn_client):
         "openshift-cluster-observability-operator",
     ]
     components.assert_pod_status(openshift_dyn_client, projects, skip_check=[])
+
+
+@pytest.mark.parametrize(
+    "openshift_dyn_client",
+    ["VP_HUBCONFIG"],
+    indirect=True,
+)
+def test_console_route(openshift_dyn_client):
+    url = route_url(openshift_dyn_client, "openshift-console", "console")
+    assert_url_reachable(url)
+
+
+@pytest.mark.parametrize(
+    "openshift_dyn_client",
+    ["VP_HUBCONFIG"],
+    indirect=True,
+)
+def test_kiali_route(openshift_dyn_client):
+    url = route_url(openshift_dyn_client, "istio-system", "kiali")
+    assert_url_reachable(url)
+
+
+@pytest.mark.parametrize(
+    "openshift_dyn_client",
+    ["VP_HUBCONFIG"],
+    indirect=True,
+)
+def test_travel_control_gateway(openshift_dyn_client):
+    url = gateway_url(
+        openshift_dyn_client, "travel-control", "travel-control-gateway"
+    )
+    assert_url_reachable(url)
