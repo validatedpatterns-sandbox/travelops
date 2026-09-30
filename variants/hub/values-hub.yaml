@@ -8,7 +8,7 @@ clusterGroup:
       operatorGroup: true
       targetNamespaces: []
     external-secrets:
-    s4-storage:
+    vp-s4-storage:
     travel-agency:
       labels:
         istio-discovery: enabled
