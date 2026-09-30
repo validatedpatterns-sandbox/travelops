@@ -1,5 +1,5 @@
 import pytest
-from validatedpatterns_tests.interop import application, components, subscription
+from validatedpatterns_tests.interop import components, subscription
 
 from .helpers import assert_url_reachable, gateway_url, route_url
 
@@ -9,23 +9,12 @@ from .helpers import assert_url_reachable, gateway_url, route_url
     ["VP_HUBCONFIG"],
     indirect=True,
 )
-def test_subscription_status_hub(openshift_dyn_client):
+def test_subscription_status(openshift_dyn_client):
     expected_subs = {
         "openshift-gitops-operator": ["openshift-gitops-operator"],
-        "advanced-cluster-management": ["open-cluster-management"],
-        "multicluster-engine": ["multicluster-engine"],
-    }
-    subscription.assert_subscription_status(openshift_dyn_client, expected_subs)
-
-
-@pytest.mark.parametrize(
-    "openshift_dyn_client",
-    ["VP_SPOKECONFIG"],
-    indirect=True,
-)
-def test_subscription_status_spoke(openshift_dyn_client):
-    expected_subs = {
-        "openshift-gitops-operator": ["openshift-gitops-operator"],
+        "tempo-product": ["openshift-tempo-operator"],
+        "cluster-observability-operator": ["openshift-cluster-observability-operator"],
+        "opentelemetry-product": ["openshift-opentelemetry-operator"],
     }
 
     subscription.assert_subscription_status(openshift_dyn_client, expected_subs)
@@ -33,11 +22,10 @@ def test_subscription_status_spoke(openshift_dyn_client):
 
 @pytest.mark.parametrize(
     "openshift_dyn_client",
-    ["VP_HUBCONFIG", "VP_SPOKECONFIG"],
+    ["VP_HUBCONFIG"],
     indirect=True,
 )
-def test_site_reachable(openshift_dyn_client):
-
+def test_site_reachable_hub(openshift_dyn_client):
     components.assert_site_reachable(openshift_dyn_client)
 
 
@@ -46,37 +34,8 @@ def test_site_reachable(openshift_dyn_client):
     ["VP_HUBCONFIG"],
     indirect=True,
 )
-def test_pod_status_hub(openshift_dyn_client):
-    projects = [
-        "patterns-operator",
-        "open-cluster-management",
-        "open-cluster-management-hub",
-        "vp-gitops",
-        "vault",
-        "hello-world",
-        "config-demo",
-        "external-secrets",
-    ]
-
-    components.assert_pod_status(openshift_dyn_client, projects, skip_check=[])
-
-
-@pytest.mark.parametrize(
-    "openshift_dyn_client",
-    ["VP_SPOKECONFIG"],
-    indirect=True,
-)
-def test_pod_status_spoke(openshift_dyn_client):
-    projects = [
-        "open-cluster-management-agent",
-        "open-cluster-management-agent-addon",
-        "vp-gitops",
-        "hello-world",
-        "config-demo",
-        "external-secrets",
-    ]
-
-    components.assert_pod_status(openshift_dyn_client, projects, skip_check=[])
+def test_argocd_reachable(openshift_dyn_client):
+    components.assert_argocd_reachable(openshift_dyn_client)
 
 
 @pytest.mark.parametrize(
@@ -84,28 +43,20 @@ def test_pod_status_spoke(openshift_dyn_client):
     ["VP_HUBCONFIG"],
     indirect=True,
 )
-def test_managed_clusters(openshift_dyn_client):
-    components.assert_managed_clusters(openshift_dyn_client, ["group-one"])
-
-
-@pytest.mark.parametrize(
-    "openshift_dyn_client",
-    ["VP_HUBCONFIG", "VP_SPOKECONFIG"],
-    indirect=True,
-)
-def test_argocd_reachable(openshift_dyn_client):
-    components.assert_argocd_reachable(openshift_dyn_client)
-
-
-@pytest.mark.parametrize(
-    "openshift_dyn_client",
-    ["VP_HUBCONFIG", "VP_SPOKECONFIG"],
-    indirect=True,
-)
-def test_argocd_applications_health(openshift_dyn_client):
-    projects = ["vp-gitops", "multicloud-gitops-hub"]
-
-    application.assert_argocd_applications(openshift_dyn_client, projects)
+def test_pod_status(openshift_dyn_client):
+    projects = [
+        "patterns-operator",
+        "vp-gitops",
+        "vault",
+        "golang-external-secrets",
+        "travel-agency",
+        "travel-control",
+        "travel-portal",
+        "openshift-tempo-operator",
+        "openshift-opentelemetry-operator",
+        "openshift-cluster-observability-operator",
+    ]
+    components.assert_pod_status(openshift_dyn_client, projects, skip_check=[])
 
 
 @pytest.mark.parametrize(
@@ -126,7 +77,6 @@ def test_console_route(openshift_dyn_client):
 def test_kiali_route(openshift_dyn_client):
     url = route_url(openshift_dyn_client, "istio-system", "kiali")
     assert_url_reachable(url)
-
 
 @pytest.mark.parametrize(
     "openshift_dyn_client",
