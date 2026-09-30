@@ -78,6 +78,7 @@ def test_kiali_route(openshift_dyn_client):
     url = route_url(openshift_dyn_client, "istio-system", "kiali")
     assert_url_reachable(url)
 
+
 @pytest.mark.parametrize(
     "openshift_dyn_client",
     ["VP_HUBCONFIG"],
