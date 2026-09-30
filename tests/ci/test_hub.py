@@ -49,6 +49,7 @@ def test_pod_status(openshift_dyn_client):
         "vp-gitops",
         "vault",
         "golang-external-secrets",
+        "vp-s4-storage",
         "travel-agency",
         "travel-control",
         "travel-portal",
