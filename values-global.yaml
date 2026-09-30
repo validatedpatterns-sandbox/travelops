@@ -1,7 +1,6 @@
 ---
 global:
   pattern: travelops
-
   singleArgoCD: true
 
   options:
@@ -11,7 +10,7 @@ global:
     autoApproveManualInstallPlans: true
 
 main:
-  clusterGroupName: hub
+  variant: hub
   multiSourceConfig:
     enabled: true
     clusterGroupChartVersion: "0.9.*"
