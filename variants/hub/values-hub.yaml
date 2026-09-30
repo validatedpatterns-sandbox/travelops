@@ -142,9 +142,7 @@ clusterGroup:
           value: secret/data/global/s4-api-credentials
         # Bucket names for the imperative Job/CronJob playbook
         - name: s4Role.buckets[0]
-          value: my-app-data
-        - name: s4Role.buckets[1]
-          value: my-app-logs
+          value: tempo-data
         # vp-rbac Role/RoleBinding namespace must match the Argo CD app namespace
         - name: vp-rbac.serviceAccounts.vp-s4-storage-sa.namespace
           value: vp-s4-storage

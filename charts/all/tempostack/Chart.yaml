@@ -1,7 +1,8 @@
 apiVersion: v2
 name: tempostack
 description: |
-  Deploys a multi-tenant TempoStack instance, optionally bundled with a MinIO backend.
+  Deploys a multi-tenant TempoStack instance backed by S3-compatible object storage
+  (vp-s4-storage by default), with an optional bundled MinIO backend for local demos.
   Ideal as a tracing backend with Red Hat Service Mesh 3 and Tempo.
 
 type: application

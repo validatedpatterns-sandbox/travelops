@@ -110,10 +110,10 @@ spec:
   data:
     - secretKey: access_key_id
       remoteRef:
-        key: {{ .Values.secretStore.remoteKey }}
+        key: {{ .Values.tempostack.minio.remoteKey | default "secret/data/global/minio-credentials" }}
         property: accessKey
     - secretKey: access_key_secret
       remoteRef:
-        key: {{ .Values.secretStore.remoteKey }}
+        key: {{ .Values.tempostack.minio.remoteKey | default "secret/data/global/minio-credentials" }}
         property: secretKey
 {{- end }}

@@ -3,6 +3,9 @@ tempostack:
     type: s3
     secretName: tempostack-default-secret
     size: 10Gi
+    # Object-storage backend used when minio.enabled is false (vp-s4-storage by default)
+    bucket: tempo-data
+    endpoint: http://vp-s4-storage.vp-s4-storage.svc:7480
 
   resources: # Resources are autonomously split between all deployments in the tempostack. Override resources per-deployment in the tempate value.
     limits:
@@ -25,11 +28,15 @@ tempostack:
       resourceNames: []
         # - traces
 
+  # Bundled MinIO is optional; prefer cluster S3 (vp-s4-storage) for OpenShift demos
   minio:
-    enabled: true
+    enabled: false
     bucket: tempo-data
 
 secretStore:
   name: vault-backend
   kind: ClusterSecretStore
-  remoteKey: secret/data/global/minio-credentials
+  # Defaults target vp-s4-storage API credentials in Vault
+  remoteKey: secret/data/global/s4-api-credentials
+  accessKeyProperty: AWS_ACCESS_KEY_ID
+  secretKeyProperty: AWS_SECRET_ACCESS_KEY
