@@ -8,6 +8,7 @@ clusterGroup:
       operatorGroup: true
       targetNamespaces: []
     external-secrets:
+    vp-s4-storage:
     travel-agency:
       labels:
         istio-discovery: enabled
@@ -127,6 +128,26 @@ clusterGroup:
       path: charts/all/distributed-tracing
       extraValueFiles:
         - /values-distributed-tracing.yaml
+    vp-s4-storage:
+      name: vp-s4-storage
+      namespace: vp-s4-storage
+      argoProject: hub
+      chart: vp-s4-storage
+      chartVersion: 0.2.*
+      overrides:
+        # Vault paths from examples/secrets/values-secret.v2.yaml (adjust prefix as needed)
+        - name: s4UICredentials.vaultKey
+          value: secret/data/global/s4-ui-credentials
+        - name: s4APICredentials.vaultKey
+          value: secret/data/global/s4-api-credentials
+        # Bucket names for the imperative Job/CronJob playbook
+        - name: s4Role.buckets[0]
+          value: tempo-data
+        # vp-rbac Role/RoleBinding namespace must match the Argo CD app namespace
+        - name: vp-rbac.serviceAccounts.vp-s4-storage-sa.namespace
+          value: vp-s4-storage
+        - name: vp-rbac.roles.external-secrets-validator.namespace
+          value: vp-s4-storage
 
 servicemesh:
   istio:

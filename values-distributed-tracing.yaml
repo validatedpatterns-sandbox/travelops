@@ -2,7 +2,12 @@ tempostack:
   namespace: tempo
 
   storage:
-    secretName: tempostack-dev-minio
+    secretName: tempostack-s3
+    bucket: tempo-data
+    endpoint: http://vp-s4-storage.vp-s4-storage.svc:7480
+
+  minio:
+    enabled: false
 
   resources:
     limits:

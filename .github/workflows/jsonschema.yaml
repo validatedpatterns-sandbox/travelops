@@ -42,7 +42,7 @@ jobs:
 
       - name: Verify ClusterGroup values.schema.json against values-*yaml files
         run: |
-          set -e; for i in values-hub.yaml; do
+          set -e; for i in variants/hub/values-hub.yaml; do
             echo "$i"
             # disable shellcheck of single quotes in yq
             # shellcheck disable=2016
