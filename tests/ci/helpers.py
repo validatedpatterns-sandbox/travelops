@@ -1,3 +1,6 @@
+import os
+
+import pytest
 import requests
 from ocp_resources.gateway_gateway_networking_k8s_io import Gateway
 from ocp_resources.route import Route
@@ -53,3 +56,33 @@ def assert_url_reachable(url, timeout=60):
     assert (
         response.status_code == 200
     ), f"Expected a 200 from '{url}' but got {response.status_code}"
+
+
+def kubeadmin_password():
+    """Return kubeadmin password from env or the file next to VP_HUBCONFIG."""
+    password = os.getenv("KUBEADMIN_PASSWORD") or os.getenv("VP_KUBEADMIN")
+    if password:
+        return password.strip()
+
+    kubeconfig = os.getenv("VP_HUBCONFIG")
+    if not kubeconfig:
+        pytest.fail(
+            "Set KUBEADMIN_PASSWORD or VP_HUBCONFIG (with a sibling admin-password file)"
+        )
+
+    candidates = []
+    if kubeconfig.endswith("-kubeconfig"):
+        candidates.append(f"{kubeconfig[: -len('-kubeconfig')]}-admin-password")
+    candidates.append(os.path.join(os.path.dirname(kubeconfig), "kubeadmin-password"))
+
+    for path in candidates:
+        if os.path.isfile(path):
+            with open(path, encoding="utf-8") as handle:
+                value = handle.read().strip()
+            if value:
+                return value
+
+    pytest.fail(
+        "kubeadmin password not found; set KUBEADMIN_PASSWORD or place "
+        "<cluster>-admin-password next to VP_HUBCONFIG"
+    )
